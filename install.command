@@ -12,5 +12,5 @@ if [ ! -d /Applications/Isocast.app ]; then
   M=$(hdiutil attach "/tmp/$F" -nobrowse -readonly | tail -1 | cut -f3)
   cp -R "$M/Isocast.app" /Applications/ && hdiutil detach "$M" -quiet
 fi
-/Applications/Isocast.app/Contents/MacOS/isocast apply isocast/setup.toml --revision 0 || echo "Isocast already has a setup, so it was not replaced."
+/Applications/Isocast.app/Contents/MacOS/isocast apply vcam/setup.toml --revision 0 || echo "The virtual camera already has a setup, so it was not replaced."
 echo "Done. Now double-click start.command"

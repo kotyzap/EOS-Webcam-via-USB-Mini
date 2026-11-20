@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EOS Webcam One-Pager</title>
+<meta name="description" content="Use a Canon EOS 80D as a Mac webcam over the normal USB cable, without Canon's app: gphoto2, one Node script and a free virtual camera.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -124,7 +125,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
     <div class="facts">
       <div><b>960×640</b><span>live view from the camera, about 15 fps</span></div>
       <div><b>1280×720</b><span>virtual camera output, 30 fps</span></div>
-      <div><b>≈1% CPU</b><span>Isocast engine on a Mac mini</span></div>
+      <div><b>≈1% CPU</b><span>virtual camera engine on a Mac mini</span></div>
       <div><b>0 windows</b><span>everything runs in the background</span></div>
     </div>
   </section>
@@ -132,7 +133,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   <section class="col">
     <h2>The problem</h2>
     <p>The 80D sends its live view over Mini-USB, but macOS only lists a camera in call apps when a signed camera extension provides it. Canon's EOS Webcam Utility is that extension, and on current macOS it freezes.</p>
-    <p>Writing your own extension needs a paid Apple Developer account. The way around it is to borrow an extension that is already signed: <a href="https://github.com/anomalyco/isocast">Isocast</a>, an open-source recording app whose virtual camera can be driven from the command line.</p>
+    <p>Writing your own extension needs a paid Apple Developer account. The way around it is to borrow an extension that is already signed, from an open-source recording app whose virtual camera can be driven from the command line.</p>
   </section>
 
   <section class="wide wf" aria-labelledby="wf-title">
@@ -143,7 +144,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
         <div class="stage" id="stage"><svg id="edges" aria-hidden="true"></svg></div>
       </div>
     </div>
-    <div class="wf-info" id="info"><b>The short version.</b> gphoto2 pulls JPEG frames from the camera, the script keeps the newest one, Isocast renders it as a 720p picture and offers it to every app as “Isocast Virtual Camera”. When no frame arrives, a text card takes its place.</div>
+    <div class="wf-info" id="info"><b>The short version.</b> gphoto2 pulls JPEG frames from the camera, the script keeps the newest one, the virtual camera renders it as a 720p picture and offers it to every app. When no frame arrives, a text card takes its place.</div>
     <div class="legend">
       <span><i style="background:#3B82F6"></i>Trigger</span>
       <span><i style="background:#10B981"></i>Processing</span>
@@ -157,18 +158,18 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   <section class="col">
     <h2>What you need</h2>
     <p>A Mac with Apple silicon and macOS 14 or later, Homebrew, and a Canon camera that gphoto2 can read live view from. It was built and tested with an EOS 80D on a Mac mini running macOS 26.5.</p>
-    <p>The installer adds Node, gphoto2 and Isocast 0.0.10 if they are missing. Isocast is downloaded from its GitHub release and checked against a known checksum before it is copied to Applications.</p>
+    <p>The installer adds Node, gphoto2 and the virtual camera engine if they are missing. The engine is the open-source app Isocast 0.0.10, downloaded from its GitHub release and checked against a known checksum before it is copied to Applications.</p>
   </section>
 
   <section class="col">
     <h2>Setup</h2>
     <ol class="steps">
-      <li><div>Unzip <code>EOS-Webcam.zip</code> anywhere.</div></li>
+      <li><div>Download the package from <a href="https://github.com/kotyzap/eos-webcam">github.com/kotyzap/eos-webcam</a> (Code → Download ZIP) and unzip it anywhere.</div></li>
       <li><div>Double-click <code>install.command</code>. If macOS refuses, right-click it and choose Open.</div></li>
       <li><div>Connect the camera by USB, switch it on in movie mode and set Auto power off to Disable.</div></li>
       <li><div>Double-click <code>start.command</code>.</div></li>
-      <li><div>The first time only, allow <b>Isocast Virtual Camera</b> in System Settings → General → Login Items &amp; Extensions → Camera Extensions.</div></li>
-      <li><div>Choose <b>Isocast Virtual Camera</b> as the camera in your call app.</div></li>
+      <li><div>The first time only, allow the virtual camera in System Settings → General → Login Items &amp; Extensions → Camera Extensions. macOS lists it there as <i>Isocast Virtual Camera</i>.</div></li>
+      <li><div>Choose that same camera in your call app.</div></li>
     </ol>
   </section>
 
@@ -180,7 +181,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
         <tbody>
           <tr><td><code>start.command</code></td><td>Starts the camera stream and the virtual camera.</td></tr>
           <tr><td><code>stop.command</code></td><td>Stops the stream and frees the camera for other apps. Call apps then show “Camera is not live”.</td></tr>
-          <tr><td><code>quit.command</code></td><td>Stops the stream and shuts Isocast down completely.</td></tr>
+          <tr><td><code>quit.command</code></td><td>Stops the stream and shuts the virtual camera down completely.</td></tr>
         </tbody>
       </table>
     </div>
@@ -190,11 +191,11 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   <section class="col">
     <h2>Limits</h2>
     <p>The picture is the camera's USB live view, so it tops out at 960×640 and about 15 fps. It is cropped to 16:9 and scaled to 720p. For full 1080p, the camera's Mini-HDMI output with an HDMI capture dongle is the better route and needs no software at all.</p>
-    <p>Isocast calls itself alpha software, and it cannot open a network stream directly yet. That is why the script serves a bare page at <code>/view</code>, which Isocast renders as a web page source.</p>
-    <p>If Isocast breaks after an update, the package also carries an OBS route: <code>install-obs.command</code> once, then <code>start-obs.command</code> and <code>stop-obs.command</code>, with the camera named “OBS Virtual Camera”.</p>
+    <p>The virtual camera engine is alpha software, and it cannot open a network stream directly yet. That is why the script serves a bare page at <code>/view</code>, which the engine renders as a web page source.</p>
+    <p>If the virtual camera breaks after an update, the package also carries an OBS route: <code>install-obs.command</code> once, then <code>start-obs.command</code> and <code>stop-obs.command</code>, with the camera named “OBS Virtual Camera”.</p>
   </section>
 
-  <footer class="col">Built by Pavel Kotyza, <a href="https://www.4xs.dev">4xs.dev</a>. Not affiliated with Canon. Uses gphoto2 and Isocast, both open source.</footer>
+  <footer class="col">Source and downloads: <a href="https://github.com/kotyzap/eos-webcam">github.com/kotyzap/eos-webcam</a>, MIT licence. Built by Pavel Kotyza, <a href="https://www.4xs.dev">4xs.dev</a>. Not affiliated with Canon. Built on gphoto2 and Isocast, both open source.</footer>
 </div>
 
 <script>
@@ -214,7 +215,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   var COLORS={trigger:'#3B82F6',process:'#10B981',tool:'#F59E0B',output:'#EF4444',store:'#6366F1',decision:'#A855F7'};
   var nodes=[
     {id:'start',t:'trigger',x:20,y:36,ic:'⚡',lb:'Run start.command',st:'Double-click the launcher',
-     d:'Starts the Node script, then tells Isocast to start its engine and its virtual camera. No window opens.'},
+     d:'Starts the Node script, then starts the virtual camera engine. No window opens.'},
     {id:'free',t:'process',x:245,y:36,ic:'🔓',lb:'Release the camera',st:'Stop macOS ptpcamerad',
      d:'macOS grabs every connected camera with its ptpcamerad service. The script stops that service so gphoto2 can claim the USB device. macOS restarts it later by itself.'},
     {id:'gphoto',t:'tool',x:470,y:36,ic:'🛠',lb:'gphoto2',st:'Reads live view over USB',
@@ -227,14 +228,14 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
      d:'The camera sends its live view as 960×640 JPEG images over the normal USB data cable. Auto power off must be disabled or it switches off mid-call.'},
     {id:'live',t:'decision',x:920,y:228,ic:'❓',lb:'Live frame available?',st:'Is the camera streaming',
      d:'While gphoto2 runs, /frame answers with a JPEG. When the camera is stopped, off or unplugged, it answers 503 and the /view page hides its picture.'},
-    {id:'compose',t:'process',x:695,y:420,ic:'🎬',lb:'Compose 720p scene',st:'Isocast renders the /view page',
-     d:'Isocast loads http://127.0.0.1:8809/view as a web page source at 1280×720 and 30 fps. The page is transparent wherever it has no picture, so the layer behind it shows through.'},
+    {id:'compose',t:'process',x:695,y:420,ic:'🎬',lb:'Compose 720p scene',st:'Rendered from the /view page',
+     d:'The engine loads http://127.0.0.1:8809/view as a web page source at 1280×720 and 30 fps. The page is transparent wherever it has no picture, so the layer behind it shows through.'},
     {id:'card',t:'process',x:920,y:420,ic:'🪧',lb:'Show “Camera is not live”',st:'Text layer behind the picture',
-     d:'A text source in the Isocast scene, placed behind the camera picture. Callers see it instead of a frozen or black image whenever the camera is not streaming.'},
-    {id:'vcam',t:'tool',x:470,y:420,ic:'🎥',lb:'Isocast Virtual Camera',st:'Signed camera extension',
-     d:'Isocast’s camera extension is signed and notarized, which is what lets macOS list it as a camera. You approve it once in System Settings.'},
+     d:'A text layer in the scene, placed behind the camera picture. Callers see it instead of a frozen or black image whenever the camera is not streaming.'},
+    {id:'vcam',t:'tool',x:470,y:420,ic:'🎥',lb:'Virtual camera',st:'Signed camera extension',
+     d:'The camera extension comes from the open-source Isocast project and is signed and notarized, which is what lets macOS list it as a camera. You approve it once in System Settings, where it appears as “Isocast Virtual Camera”.'},
     {id:'apps',t:'output',x:245,y:420,ic:'✅',lb:'Zoom, Meet, Detail',st:'Pick it like any webcam',
-     d:'Any app with a camera menu can select “Isocast Virtual Camera”. Restart the app if it was open before the camera first appeared.'}
+     d:'Any app with a camera menu can select the virtual camera. Restart the app if it was open before the camera first appeared.'}
   ];
   var edges=[
     ['start','free','launch'],

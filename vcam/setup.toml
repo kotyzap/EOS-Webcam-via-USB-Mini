@@ -1,4 +1,4 @@
-# EOS Webcam setup for Isocast: the /view page of eos-webcam.js as a web page source, sent to Isocast Virtual Camera.
+# EOS Webcam virtual camera scene (Isocast setup file): the /view page of eos-webcam.js over a text card.
 version = 1
 name = "EOS Webcam"
 
