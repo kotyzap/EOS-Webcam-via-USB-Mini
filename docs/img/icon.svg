@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- EOS Webcam app icon - original artwork, Pavel Kotyza / 4xs.dev -->
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9dee5"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a505a"/><stop offset="1" stop-color="#1d2026"/>
+    </linearGradient>
+    <radialGradient id="glass" cx="0.38" cy="0.34" r="0.75">
+      <stop offset="0" stop-color="#5fb0ee"/><stop offset="0.45" stop-color="#1c5fa3"/><stop offset="1" stop-color="#061425"/>
+    </radialGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#body)" stroke="#c3c9d1" stroke-width="4"/>
+  <circle cx="232" cy="232" r="34" fill="#e5372b"/>
+  <rect x="690" y="202" width="118" height="60" rx="18" fill="#c5cbd3"/>
+  <circle cx="512" cy="548" r="262" fill="url(#ring)"/>
+  <circle cx="512" cy="548" r="222" fill="#0e1014"/>
+  <circle cx="512" cy="548" r="190" fill="url(#glass)"/>
+  <circle cx="512" cy="548" r="78" fill="#050a12"/>
+  <ellipse cx="438" cy="466" rx="58" ry="36" fill="#ffffff" opacity="0.38" transform="rotate(-35 438 466)"/>
+  <circle cx="574" cy="618" r="16" fill="#ffffff" opacity="0.22"/>
+</svg>
