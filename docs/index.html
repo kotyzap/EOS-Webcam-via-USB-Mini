@@ -50,6 +50,7 @@ code{font:0.9em var(--mono);background:var(--code-bg);padding:1px 6px;border-rad
 section{display:flex;flex-direction:column;gap:4px}
 ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:10px}
 ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start}
+ol.steps code{overflow-wrap:anywhere}
 ol.steps li::before{content:counter(s);font:500 14px var(--mono);color:var(--accent);border:1px solid var(--line);background:var(--surface);border-radius:6px;text-align:center;line-height:28px}
 table{width:100%;border-collapse:collapse;font-size:15px}
 .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
@@ -164,8 +165,8 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   <section class="col">
     <h2>Setup</h2>
     <ol class="steps">
-      <li><div>Download the package from <a href="https://github.com/kotyzap/eos-webcam">github.com/kotyzap/eos-webcam</a> (Code → Download ZIP) and unzip it.</div></li>
-      <li><div>Double-click <code>install.command</code>. If macOS refuses, right-click it and choose Open. When it finishes, a camera icon appears in the menu bar.</div></li>
+      <li><div>Open Terminal, paste this line and press Return:<br><code>curl -fsSL https://raw.githubusercontent.com/kotyzap/eos-webcam/main/install.command | zsh</code><br>Prefer a file? Download <code>EOS-Webcam-Installer.zip</code> from the <a href="https://github.com/kotyzap/eos-webcam/releases/latest">latest release</a> and double-click <code>install.command</code>. macOS blocks it the first time: allow it under System Settings → Privacy &amp; Security → Open Anyway.</div></li>
+      <li><div>When it finishes, a camera icon appears in the menu bar.</div></li>
       <li><div>Connect the camera by USB, switch it on in movie mode and set Auto power off to Disable.</div></li>
       <li><div>Click the camera icon in the menu bar and choose <b>Start camera</b>.</div></li>
       <li><div>The first time only, allow the virtual camera in System Settings → General → Login Items &amp; Extensions → Camera Extensions. macOS lists it there as <i>Isocast Virtual Camera</i>.</div></li>

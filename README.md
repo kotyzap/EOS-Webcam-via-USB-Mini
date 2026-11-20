@@ -22,20 +22,20 @@ Canon's EOS Webcam Utility freezes on macOS 26. This project replaces it with on
 
 ## Install
 
-There is one file to run: `install.command`.
-
-1. Download this repository (**Code > Download ZIP**) and unzip it.
-2. Double-click `install.command`. If macOS refuses to open it, right-click it and choose **Open**.
-3. Connect the camera by USB, switch it on in movie mode and set **Auto power off** to **Disable**.
-4. Click the camera icon in the menu bar and choose **Start camera**.
-5. First time only: allow the virtual camera in System Settings > General > Login Items & Extensions > Camera Extensions. macOS lists it there as *Isocast Virtual Camera*.
-6. Choose that same camera in your call app.
-
-Or, from Terminal, without downloading anything first:
+**Easiest: one line in Terminal.** Open Terminal, paste this and press Return:
 
 ```
 curl -fsSL https://raw.githubusercontent.com/kotyzap/eos-webcam/main/install.command | zsh
 ```
+
+**Or with a file:** download `EOS-Webcam-Installer.zip` from the [latest release](https://github.com/kotyzap/eos-webcam/releases/latest), unzip it and double-click `install.command`. macOS blocks a downloaded script the first time: open System Settings > Privacy & Security, scroll down and click **Open Anyway**.
+
+Either way, a camera icon appears in the menu bar when it finishes. Then:
+
+1. Connect the camera by USB, switch it on in movie mode and set **Auto power off** to **Disable**.
+2. Click the camera icon in the menu bar and choose **Start camera**.
+3. First time only: allow the virtual camera in System Settings > General > Login Items & Extensions > Camera Extensions. macOS lists it there as *Isocast Virtual Camera*.
+4. Choose that same camera in your call app.
 
 The installer puts **EOS Webcam.app** in Applications. After that you can delete the downloaded folder.
 
@@ -68,7 +68,7 @@ macOS only lists a camera in call apps when a signed camera extension provides i
 
 - **Orange lens after Start.** The camera is off, asleep, unplugged or held by another program. The preview page shows the reason, for example "No camera found". Close EOS Utility, Cascable and similar apps, then choose Start camera again.
 - **The camera switches off mid-call.** Set Auto power off to Disable and use a dummy-battery AC adapter for long sessions.
-- **The virtual camera is missing from the app's camera list.** Approve the extension in System Settings (step 5), then restart the call app.
+- **The virtual camera is missing from the app's camera list.** Approve the extension in System Settings (step 3), then restart the call app.
 - **To change the card text,** edit `src/setup.toml` and re-apply it (see `isocast apply --help`).
 
 ## Limits
