@@ -9,7 +9,7 @@ const PORT = 8809;
 const GPHOTO = '/opt/homebrew/bin/gphoto2';
 const BOUNDARY = Buffer.from([0xff, 0xd9, 0xff, 0xd8]); // JPEG end + next JPEG start
 
-let proc = null, buf = Buffer.alloc(0), lastErr = '';
+let proc = null, buf = Buffer.alloc(0), lastErr = '', battery = null;
 let frames = 0, fps = 0, lastCount = 0, last = null, served = 0;
 const clients = new Set();
 
@@ -28,6 +28,11 @@ function start() {
   if (proc) return;
   lastErr = ''; buf = Buffer.alloc(0);
   spawnSync('pkill', ['-9', 'ptpcamerad']); // macOS grabs the camera first; release it
+  // Battery level can only be read while the stream is not running, so read it once here.
+  const b = spawnSync(GPHOTO, ['--get-config', 'batterylevel'], { encoding: 'utf8', timeout: 6000 });
+  const m = /Current:\s*(.+)/.exec(b.stdout || '');
+  battery = m ? m[1].trim() : null;
+  spawnSync('pkill', ['-9', 'ptpcamerad']);
   const p = spawn(GPHOTO, ['--capture-movie', '--stdout']);
   proc = p;
   p.stdout.on('data', (d) => {
@@ -56,14 +61,15 @@ header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 h1{font-size:18px;margin:0;flex:1}
 button{font:inherit;padding:6px 14px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
 button.p{background:var(--acc);border-color:var(--acc);color:#fff}
-#v{display:block;width:100%;aspect-ratio:3/2;background:#000;border-radius:8px;object-fit:contain}
+#box{position:relative;aspect-ratio:3/2;background:#000;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#9aa3ad}
+#v{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:none}
 #s{margin:10px 0;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:6px}
 footer{opacity:.6;font-size:13px}
 </style></head><body><main>
 <header><h1>EOS Webcam</h1>
 <button class="p" id="on">Start</button><button id="off">Stop</button>
 <button id="fs">Fullscreen</button><button id="th">Dark</button></header>
-<img id="v" alt="Live view">
+<div id="box"><span>Camera is not live</span><img id="v" alt=""></div>
 <div id="s">Loading...</div>
 <footer>4xs.dev - Pavel Kotyza</footer>
 </main><script>
@@ -71,7 +77,7 @@ const $=(i)=>document.getElementById(i),root=document.documentElement;
 function theme(t){root.dataset.theme=t;$('th').textContent=t==='dark'?'Light':'Dark';try{localStorage.theme=t}catch(e){}}
 try{if(localStorage.theme)theme(localStorage.theme)}catch(e){}
 $('th').onclick=()=>theme(root.dataset.theme==='dark'?'light':'dark');
-$('fs').onclick=()=>$('v').requestFullscreen();
+$('fs').onclick=()=>$('box').requestFullscreen();
 const post=(p)=>fetch(p,{method:'POST'}).then(poll);
 $('on').onclick=()=>post('/api/start');
 $('off').onclick=()=>post('/api/stop');
@@ -81,14 +87,14 @@ async function poll(){
     const s=await (await fetch('/api/status')).json();
     was=s.running;
     $('s').textContent=s.running?'Streaming - '+s.fps+' fps':'Stopped'+(s.error?' - '+s.error:'');
-  }catch(e){was=false;$('s').textContent='Script is not running'}
+  }catch(e){was=false;$('s').textContent='Script is not running. Use Start camera in the menu bar or start.command.'}
 }
 setInterval(poll,1000);poll();
 function draw(){
   const v=$('v');
-  if(!was)return setTimeout(draw,500);
-  v.onload=()=>setTimeout(draw,30);
-  v.onerror=()=>setTimeout(draw,500);
+  if(!was){v.style.display='none';return setTimeout(draw,500)}
+  v.onload=()=>{v.style.display='block';setTimeout(draw,30)};
+  v.onerror=()=>{v.style.display='none';setTimeout(draw,500)};
   v.src='/frame?'+Date.now();
 }
 draw();
@@ -124,7 +130,7 @@ http.createServer((req, res) => {
     res.end(last); served++;
   } else if (path === '/api/status') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ running: !!proc, fps, frames, served, error: lastErr }));
+    res.end(JSON.stringify({ running: !!proc, fps, frames, served, battery, error: lastErr }));
   } else if (req.method === 'POST' && (path === '/api/start' || path === '/api/stop')) {
     (path === '/api/start' ? start : stop)();
     res.writeHead(204); res.end();

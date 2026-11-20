@@ -121,12 +121,12 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
 
   <section class="col">
     <h1>A Canon EOS 80D as a Mac webcam, with the USB cable you already have</h1>
-    <p class="lede">Canon's own webcam app freezes on macOS 26. This setup replaces it with one small script and a free virtual camera, so the 80D shows up in Zoom, Meet or Detail like any other camera.</p>
+    <p class="lede">Canon's own webcam app freezes on macOS 26. This setup replaces it with one small menu bar app and a free virtual camera, so the 80D shows up in Zoom, Meet or Detail like any other camera.</p>
     <div class="facts">
       <div><b>960×640</b><span>live view from the camera, about 15 fps</span></div>
       <div><b>1280×720</b><span>virtual camera output, 30 fps</span></div>
       <div><b>≈1% CPU</b><span>virtual camera engine on a Mac mini</span></div>
-      <div><b>0 windows</b><span>everything runs in the background</span></div>
+      <div><b>1 file</b><span>to run: the installer builds one menu bar app</span></div>
     </div>
   </section>
 
@@ -158,16 +158,16 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   <section class="col">
     <h2>What you need</h2>
     <p>A Mac with Apple silicon and macOS 14 or later, Homebrew, and a Canon camera that gphoto2 can read live view from. It was built and tested with an EOS 80D on a Mac mini running macOS 26.5.</p>
-    <p>The installer adds Node, gphoto2 and the virtual camera engine if they are missing. The engine is the open-source app Isocast 0.0.10, downloaded from its GitHub release and checked against a known checksum before it is copied to Applications.</p>
+    <p>The installer adds Node, gphoto2 and the virtual camera engine if they are missing, then builds the EOS Webcam app on your Mac and puts it in Applications. The engine is the open-source app Isocast 0.0.10, downloaded from its GitHub release and checked against a known checksum.</p>
   </section>
 
   <section class="col">
     <h2>Setup</h2>
     <ol class="steps">
-      <li><div>Download the package from <a href="https://github.com/kotyzap/eos-webcam">github.com/kotyzap/eos-webcam</a> (Code → Download ZIP) and unzip it anywhere.</div></li>
-      <li><div>Double-click <code>install.command</code>. If macOS refuses, right-click it and choose Open.</div></li>
+      <li><div>Download the package from <a href="https://github.com/kotyzap/eos-webcam">github.com/kotyzap/eos-webcam</a> (Code → Download ZIP) and unzip it.</div></li>
+      <li><div>Double-click <code>install.command</code>. If macOS refuses, right-click it and choose Open. When it finishes, a camera icon appears in the menu bar.</div></li>
       <li><div>Connect the camera by USB, switch it on in movie mode and set Auto power off to Disable.</div></li>
-      <li><div>Double-click <code>start.command</code>.</div></li>
+      <li><div>Click the camera icon in the menu bar and choose <b>Start camera</b>.</div></li>
       <li><div>The first time only, allow the virtual camera in System Settings → General → Login Items &amp; Extensions → Camera Extensions. macOS lists it there as <i>Isocast Virtual Camera</i>.</div></li>
       <li><div>Choose that same camera in your call app.</div></li>
     </ol>
@@ -177,22 +177,22 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
     <h2>Daily use</h2>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>File</th><th>What it does</th></tr></thead>
+        <thead><tr><th>Menu item</th><th>Lens colour</th><th>What it does</th></tr></thead>
         <tbody>
-          <tr><td><code>start.command</code></td><td>Starts the camera stream and the virtual camera.</td></tr>
-          <tr><td><code>stop.command</code></td><td>Stops the stream and frees the camera for other apps. Call apps then show “Camera is not live”.</td></tr>
-          <tr><td><code>quit.command</code></td><td>Stops the stream and shuts the virtual camera down completely.</td></tr>
+          <tr><td>Start camera</td><td>Green</td><td>Starts the camera stream and the virtual camera.</td></tr>
+          <tr><td>Stop camera</td><td>Orange</td><td>Frees the camera for other apps. Call apps show the “not live” card.</td></tr>
+          <tr><td>Turn off</td><td>Red</td><td>Ends the background script as well. The card stays.</td></tr>
         </tbody>
       </table>
     </div>
-    <p style="margin-top:12px">A preview with Start and Stop buttons is at <code>http://127.0.0.1:8809</code> while the script runs. Close EOS Utility and similar apps first, since only one program can hold the camera.</p>
+    <p style="margin-top:12px">The menu also shows the camera battery level, read when the stream starts, and opens a preview page at <code>http://127.0.0.1:8809</code>. Close EOS Utility and similar apps first, since only one program can hold the camera.</p>
   </section>
 
   <section class="col">
     <h2>Limits</h2>
     <p>The picture is the camera's USB live view, so it tops out at 960×640 and about 15 fps. It is cropped to 16:9 and scaled to 720p. For full 1080p, the camera's Mini-HDMI output with an HDMI capture dongle is the better route and needs no software at all.</p>
     <p>The virtual camera engine is alpha software, and it cannot open a network stream directly yet. That is why the script serves a bare page at <code>/view</code>, which the engine renders as a web page source.</p>
-    <p>If the virtual camera breaks after an update, the package also carries an OBS route: <code>install-obs.command</code> once, then <code>start-obs.command</code> and <code>stop-obs.command</code>, with the camera named “OBS Virtual Camera”.</p>
+    
   </section>
 
   <footer class="col">Source and downloads: <a href="https://github.com/kotyzap/eos-webcam">github.com/kotyzap/eos-webcam</a>, MIT licence. Built by Pavel Kotyza, <a href="https://www.4xs.dev">4xs.dev</a>. Not affiliated with Canon. Built on gphoto2 and Isocast, both open source.</footer>
@@ -214,8 +214,8 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   var W=1110,H=560,NW=170,NH=104;
   var COLORS={trigger:'#3B82F6',process:'#10B981',tool:'#F59E0B',output:'#EF4444',store:'#6366F1',decision:'#A855F7'};
   var nodes=[
-    {id:'start',t:'trigger',x:20,y:36,ic:'⚡',lb:'Run start.command',st:'Double-click the launcher',
-     d:'Starts the Node script, then starts the virtual camera engine. No window opens.'},
+    {id:'start',t:'trigger',x:20,y:36,ic:'⚡',lb:'Choose Start camera',st:'In the menu bar app',
+     d:'The EOS Webcam menu bar app starts the Node script, then the virtual camera engine. No window opens.'},
     {id:'free',t:'process',x:245,y:36,ic:'🔓',lb:'Release the camera',st:'Stop macOS ptpcamerad',
      d:'macOS grabs every connected camera with its ptpcamerad service. The script stops that service so gphoto2 can claim the USB device. macOS restarts it later by itself.'},
     {id:'gphoto',t:'tool',x:470,y:36,ic:'🛠',lb:'gphoto2',st:'Reads live view over USB',

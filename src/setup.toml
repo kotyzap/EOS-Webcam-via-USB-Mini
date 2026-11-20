@@ -16,24 +16,50 @@ width = 1280
 height = 720
 fps = 30
 
+# The card that call apps see whenever there is no live picture.
+[[sources]]
+id = "card-bg"
+name = "Card background"
+kind = "color"
+color = "#1e1e1e"
+
+[[sources]]
+id = "card-title"
+name = "Card title"
+kind = "text"
+text = "EOS Webcam"
+size = 96.0
+color = "#ffffff"
+align = "center"
+
 [[sources]]
 id = "not-live"
-name = "Not live card"
+name = "Card subtitle"
 kind = "text"
-text = "Pavel's camera is not live"
-size = 64.0
-color = "#ffffff"
+text = "Camera is not live"
+size = 30.0
+color = "#9a9a9a"
 align = "center"
 
 [[scenes]]
 id = "eos"
 name = "EOS"
 
-# Shown whenever the picture above it has no live frame.
+# Card layers, drawn behind the camera picture.
+[[scenes.items]]
+source = "card-bg"
+fit = "stretch"
+rect = { x = 0, y = 0, width = 1280, height = 720 }
+
+[[scenes.items]]
+source = "card-title"
+fit = "contain"
+rect = { x = 240, y = 275, width = 800, height = 110 }
+
 [[scenes.items]]
 source = "not-live"
 fit = "contain"
-rect = { x = 240, y = 310, width = 800, height = 100 }
+rect = { x = 240, y = 405, width = 800, height = 38 }
 
 [[scenes.items]]
 source = "canon"
