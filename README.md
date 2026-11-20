@@ -6,7 +6,7 @@
 
 <p align="center">
   Use a Canon EOS 80D as a Mac webcam over the normal USB cable, without Canon's app.<br>
-  <a href="https://kotyzap.github.io/eos-webcam/"><b>Explainer with interactive diagram</b></a>
+  <a href="https://kotyzap.github.io/eos-webcam-via-usb-mini/"><b>Explainer with interactive diagram</b></a>
 </p>
 
 ---
@@ -25,10 +25,10 @@ Canon's EOS Webcam Utility freezes on macOS 26. This project replaces it with on
 **Easiest: one line in Terminal.** Open Terminal, paste this and press Return:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/kotyzap/eos-webcam/main/install.command | zsh
+curl -fsSL https://raw.githubusercontent.com/kotyzap/eos-webcam-via-usb-mini/main/install.command | zsh
 ```
 
-**Or with a file:** download `EOS-Webcam-Installer.zip` from the [latest release](https://github.com/kotyzap/eos-webcam/releases/latest), unzip it and double-click `install.command`. macOS blocks a downloaded script the first time: open System Settings > Privacy & Security, scroll down and click **Open Anyway**.
+**Or with a file:** download `EOS-Webcam-Installer.zip` from the [latest release](https://github.com/kotyzap/eos-webcam-via-usb-mini/releases/latest), unzip it and double-click `install.command`. macOS blocks a downloaded script the first time: open System Settings > Privacy & Security, scroll down and click **Open Anyway**.
 
 Either way, a camera icon appears in the menu bar when it finishes. Then:
 

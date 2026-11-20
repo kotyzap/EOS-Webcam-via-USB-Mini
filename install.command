@@ -9,8 +9,8 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 if [ ! -f src/EOSWebcamMenu.swift ]; then
   T=$(mktemp -d)
   echo "Downloading EOS Webcam sources..."
-  curl -fsSL https://github.com/kotyzap/eos-webcam/archive/refs/heads/main.tar.gz | tar xz -C "$T" || { echo "Download failed."; exit 1; }
-  cd "$T/eos-webcam-main" || exit 1
+  curl -fsSL https://github.com/kotyzap/eos-webcam-via-usb-mini/archive/refs/heads/main.tar.gz | tar xz -C "$T" || { echo "Download failed."; exit 1; }
+  cd "$T/eos-webcam-via-usb-mini-main" || exit 1
 fi
 
 command -v brew >/dev/null || { echo "Install Homebrew first: https://brew.sh"; exit 1; }
