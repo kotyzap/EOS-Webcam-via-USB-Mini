@@ -35,5 +35,6 @@ cp src/Info.plist "$A/Contents/Info.plist"
 cp src/icon.icns src/eos-webcam.js src/setup.toml src/start.sh "$A/Contents/Resources/"
 chmod +x "$A/Contents/Resources/start.sh"
 codesign --force -s - "$A" 2>/dev/null
+touch "$A" # make Finder pick up the icon
 open "$A"
 echo "Done. EOS Webcam is in Applications and in the menu bar (camera icon). Choose Start camera there."
