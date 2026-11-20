@@ -38,6 +38,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let status = NSMenuItem(title: "Checking...", action: nil, keyEquivalent: "")
     let battery = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     let api = "http://127.0.0.1:8809"
+    // Optional Info.plist key "EOSOpenApp": an app to open, together with the camera, whenever this app is opened.
+    let companion = Bundle.main.object(forInfoDictionaryKey: "EOSOpenApp") as? String
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let menu = NSMenu()
@@ -56,6 +58,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         show(text: "Checking...", color: .systemGray, battery: nil)
         refresh()
         Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in self?.refresh() }
+        openCompanion()
+    }
+
+    func openCompanion() {
+        guard let name = companion else { return }
+        startCamera()
+        run("/usr/bin/open", ["-a", name])
+    }
+
+    // Clicking the app again (for example in the Dock) while it is running.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        openCompanion()
+        return false
     }
 
     func dotted(_ text: String, _ color: NSColor) -> NSAttributedString {
