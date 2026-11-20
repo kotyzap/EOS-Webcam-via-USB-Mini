@@ -1,0 +1,139 @@
+#!/usr/bin/env node
+// EOS Webcam - Canon live view over USB as a local MJPEG stream with a browser UI.
+// Author: Pavel Kotyza <kotyza@gmail.com> - 4xs.dev
+// Needs: brew install gphoto2.   Run: node eos-webcam.js   then open http://127.0.0.1:8809
+const http = require('http');
+const { spawn, spawnSync } = require('child_process');
+
+const PORT = 8809;
+const GPHOTO = '/opt/homebrew/bin/gphoto2';
+const BOUNDARY = Buffer.from([0xff, 0xd9, 0xff, 0xd8]); // JPEG end + next JPEG start
+
+let proc = null, buf = Buffer.alloc(0), lastErr = '';
+let frames = 0, fps = 0, lastCount = 0, last = null, served = 0;
+const clients = new Set();
+
+setInterval(() => { fps = frames - lastCount; lastCount = frames; }, 1000);
+
+function onFrame(jpg) {
+  frames++; last = jpg;
+  for (const res of clients) {
+    res.write(`--eosframe7d1c9a42\r\nContent-Type: image/jpeg\r\nContent-Length: ${jpg.length}\r\n\r\n`);
+    res.write(jpg);
+    res.write('\r\n');
+  }
+}
+
+function start() {
+  if (proc) return;
+  lastErr = ''; buf = Buffer.alloc(0);
+  spawnSync('pkill', ['-9', 'ptpcamerad']); // macOS grabs the camera first; release it
+  const p = spawn(GPHOTO, ['--capture-movie', '--stdout']);
+  proc = p;
+  p.stdout.on('data', (d) => {
+    buf = Buffer.concat([buf, d]);
+    let i;
+    while ((i = buf.indexOf(BOUNDARY)) !== -1) {
+      onFrame(buf.subarray(0, i + 2));
+      buf = buf.subarray(i + 2);
+    }
+  });
+  p.stderr.on('data', (d) => { lastErr = d.toString().trim().split('\n').pop(); });
+  p.on('error', (e) => { lastErr = e.message; if (proc === p) proc = null; });
+  p.on('exit', (code) => { if (!code) lastErr = ''; if (proc === p) proc = null; });
+}
+
+function stop() { if (proc) proc.kill('SIGINT'); }
+
+const PAGE = `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8">
+<title>EOS Webcam</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#f6f7f9;--fg:#1c1e21;--card:#fff;--line:#d9dce1;--acc:#0a66c2}
+[data-theme=dark]{--bg:#16181c;--fg:#e8eaed;--card:#22252b;--line:#3a3f47;--acc:#5aa9f5}
+body{margin:0;font:15px/1.4 -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+main{max-width:1000px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+h1{font-size:18px;margin:0;flex:1}
+button{font:inherit;padding:6px 14px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+#v{display:block;width:100%;aspect-ratio:3/2;background:#000;border-radius:8px;object-fit:contain}
+#s{margin:10px 0;padding:8px 12px;background:var(--card);border:1px solid var(--line);border-radius:6px}
+footer{opacity:.6;font-size:13px}
+</style></head><body><main>
+<header><h1>EOS Webcam</h1>
+<button class="p" id="on">Start</button><button id="off">Stop</button>
+<button id="fs">Fullscreen</button><button id="th">Dark</button></header>
+<img id="v" alt="Live view">
+<div id="s">Loading...</div>
+<footer>4xs.dev - Pavel Kotyza</footer>
+</main><script>
+const $=(i)=>document.getElementById(i),root=document.documentElement;
+function theme(t){root.dataset.theme=t;$('th').textContent=t==='dark'?'Light':'Dark';try{localStorage.theme=t}catch(e){}}
+try{if(localStorage.theme)theme(localStorage.theme)}catch(e){}
+$('th').onclick=()=>theme(root.dataset.theme==='dark'?'light':'dark');
+$('fs').onclick=()=>$('v').requestFullscreen();
+const post=(p)=>fetch(p,{method:'POST'}).then(poll);
+$('on').onclick=()=>post('/api/start');
+$('off').onclick=()=>post('/api/stop');
+let was=false;
+async function poll(){
+  try{
+    const s=await (await fetch('/api/status')).json();
+    was=s.running;
+    $('s').textContent=s.running?'Streaming - '+s.fps+' fps':'Stopped'+(s.error?' - '+s.error:'');
+  }catch(e){was=false;$('s').textContent='Script is not running'}
+}
+setInterval(poll,1000);poll();
+function draw(){
+  const v=$('v');
+  if(!was)return setTimeout(draw,500);
+  v.onload=()=>setTimeout(draw,30);
+  v.onerror=()=>setTimeout(draw,500);
+  v.src='/frame?'+Date.now();
+}
+draw();
+</script></body></html>`;
+
+// Bare full-frame view, used as the web page source in Isocast.
+const VIEW = `<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;background:transparent;overflow:hidden}
+img{width:100vw;height:100vh;object-fit:cover;display:none}
+</style></head><body><img id="v"><script>
+const v=document.getElementById('v');
+function next(){v.src='/frame?'+Date.now()}
+v.onload=()=>{v.style.display='block';setTimeout(next,30)};
+v.onerror=()=>{v.style.display='none';setTimeout(next,1000)};
+next();
+</script></body></html>`;
+
+http.createServer((req, res) => {
+  const path = req.url.split('?')[0];
+  if (path === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(PAGE);
+  } else if (path === '/view') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(VIEW);
+  } else if (path === '/stream') {
+    res.writeHead(200, { 'Content-Type': 'multipart/x-mixed-replace; boundary=eosframe7d1c9a42', 'Cache-Control': 'no-store' });
+    clients.add(res);
+    req.on('close', () => clients.delete(res));
+  } else if (path === '/frame') {
+    if (!last || !proc) { res.writeHead(503); return res.end(); }
+    res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-store' });
+    res.end(last); served++;
+  } else if (path === '/api/status') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ running: !!proc, fps, frames, served, error: lastErr }));
+  } else if (req.method === 'POST' && (path === '/api/start' || path === '/api/stop')) {
+    (path === '/api/start' ? start : stop)();
+    res.writeHead(204); res.end();
+  } else {
+    res.writeHead(404); res.end();
+  }
+}).listen(PORT, '127.0.0.1', () => {
+  console.log(`EOS Webcam: http://127.0.0.1:${PORT}`);
+  start();
+});
+
+process.on('SIGINT', () => { stop(); setTimeout(() => process.exit(0), 500); });

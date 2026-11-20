@@ -1,0 +1,70 @@
+# EOS Webcam setup for Isocast: the /view page of eos-webcam.js as a web page source, sent to Isocast Virtual Camera.
+version = 1
+name = "EOS Webcam"
+
+[canvas]
+width = 1280
+height = 720
+fps = 30
+
+[[sources]]
+id = "canon"
+name = "Canon 80D"
+kind = "browser"
+url = "http://127.0.0.1:8809/view"
+width = 1280
+height = 720
+fps = 30
+
+[[sources]]
+id = "not-live"
+name = "Not live card"
+kind = "text"
+text = "Pavel's camera is not live"
+size = 64.0
+color = "#ffffff"
+align = "center"
+
+[[scenes]]
+id = "eos"
+name = "EOS"
+
+# Shown whenever the picture above it has no live frame.
+[[scenes.items]]
+source = "not-live"
+fit = "contain"
+rect = { x = 240, y = 310, width = 800, height = 100 }
+
+[[scenes.items]]
+source = "canon"
+fit = "cover"
+rect = { x = 0, y = 0, width = 1280, height = 720 }
+
+[virtual_camera]
+target = "program"
+
+# Recording is not used; Isocast requires the section.
+[recording]
+folder = "~/Movies/Isocast"
+keep_free_gb = 1.0
+
+[recording.program]
+enabled = false
+filename = "{date} {time}"
+audio = []
+
+[recording.program.encoder]
+codec = "h264"
+quality = "high"
+container = "mp4"
+bit_depth = 8
+
+[recording.iso]
+enabled = false
+sources = []
+filename = "{SOURCE}-{date} {time}"
+
+[recording.iso.encoder]
+codec = "hevc"
+quality = "high"
+container = "mp4"

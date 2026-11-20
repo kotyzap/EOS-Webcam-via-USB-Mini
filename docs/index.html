@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EOS Webcam One-Pager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one reading column (max 68ch) for the story, with the workflow diagram breaking out to full page width. */
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --ink:#18202b; --muted:#5b6777; --line:#d5dbe3;
+  --accent:#1c5fa3; --live:#d5342a; --code-bg:#e9edf2;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11151b; --surface:#1a2029; --ink:#e7ebf0; --muted:#9aa6b5; --line:#2e3744;
+    --accent:#6db3ee; --live:#ff6a5e; --code-bg:#242c38; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11151b; --surface:#1a2029; --ink:#e7ebf0; --muted:#9aa6b5; --line:#2e3744;
+  --accent:#6db3ee; --live:#ff6a5e; --code-bg:#242c38; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+.page{display:flex;flex-direction:column;gap:56px;padding:28px 20px 48px}
+.col{width:100%;max-width:68ch;margin:0 auto}
+.wide{width:100%;max-width:1160px;margin:0 auto}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font:500 14px var(--mono);color:var(--muted)}
+.logo{width:44px;height:44px;flex:none}
+button.theme{font:500 14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer}
+button.theme:focus-visible,.node:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font:700 clamp(32px,5vw,48px)/1.08 var(--display);margin:0 0 16px;text-wrap:balance;letter-spacing:-0.01em}
+h2{font:600 24px/1.2 var(--display);margin:0 0 12px;text-wrap:balance}
+p{margin:0 0 12px}
+.lede{font-size:19px;color:var(--muted)}
+code{font:0.9em var(--mono);background:var(--code-bg);padding:1px 6px;border-radius:5px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:24px}
+.facts div{background:var(--surface);padding:14px 16px}
+.facts b{display:block;font:600 20px var(--display);font-variant-numeric:tabular-nums}
+.facts span{font-size:13px;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:4px}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:10px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start}
+ol.steps li::before{content:counter(s);font:500 14px var(--mono);color:var(--accent);border:1px solid var(--line);background:var(--surface);border-radius:6px;text-align:center;line-height:28px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font:500 13px var(--mono);color:var(--muted)}
+td:first-child{white-space:nowrap}
+footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px}
+
+/* Workflow diagram: always dark, in both themes. */
+.wf{background:#0f0f0f;border-radius:14px;padding:22px;color:#fff}
+.wf h2{color:#fff;margin-bottom:4px}
+.wf .sub{color:#888;margin:0 0 16px;font-size:15px}
+.wf-scroll{overflow-x:auto;background:#161616;border-radius:12px}
+.wf-fit{position:relative}
+.stage{position:absolute;left:0;top:0;width:1110px;height:560px;transform-origin:0 0}
+.stage svg{position:absolute;inset:0;width:1110px;height:560px;pointer-events:none}
+.node{position:absolute;width:170px;height:104px;border-radius:12px;border:2px solid;padding:10px 12px;color:#fff;cursor:pointer;
+  display:flex;flex-direction:column;gap:2px;justify-content:center;font-family:var(--body);text-align:left;transition:transform .15s,box-shadow .15s,opacity .15s}
+.node .ic{font-size:18px;line-height:1}
+.node .lb{font-weight:600;font-size:14px;line-height:1.2}
+.node .st{font-size:12px;line-height:1.25;color:#c9c9c9}
+.node:hover,.node.on{transform:scale(1.05);box-shadow:0 0 18px var(--glow)}
+.node.dim{opacity:.28}
+.t-trigger{background:#1e3a5f;border-color:#3B82F6;--glow:#3B82F6aa}
+.t-process{background:#1a3d2e;border-color:#10B981;--glow:#10B981aa}
+.t-tool{background:#3d2e1a;border-color:#F59E0B;--glow:#F59E0Baa}
+.t-output{background:#3d1a1a;border-color:#EF4444;--glow:#EF4444aa}
+.t-store{background:#1a1a2e;border-color:#6366F1;--glow:#6366F1aa}
+.t-decision{background:#2e1a3d;border-color:#A855F7;--glow:#A855F7aa}
+.edge{fill:none;stroke:#444;stroke-width:2}
+.edge.hot{stroke-dasharray:7 5;animation:dash 0.7s linear infinite}
+.edge.dim{opacity:.25}
+.elabel{font:11px var(--mono);fill:#bdbdbd}
+.elabel-bg{fill:#161616}
+@keyframes dash{to{stroke-dashoffset:-12}}
+@media (prefers-reduced-motion: reduce){.edge.hot{animation:none}.node{transition:none}}
+.wf-info{margin-top:14px;background:#161616;border-radius:10px;padding:12px 16px;font-size:14px;color:#d6d6d6;min-height:66px}
+.wf-info b{color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font-size:13px;color:#aaa}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="top wide">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 1024 1024" role="img" aria-label="EOS Webcam icon">
+        <defs>
+          <linearGradient id="lg-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9dee5"/></linearGradient>
+          <linearGradient id="lg-ring" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a505a"/><stop offset="1" stop-color="#1d2026"/></linearGradient>
+          <radialGradient id="lg-glass" cx="0.38" cy="0.34" r="0.75"><stop offset="0" stop-color="#5fb0ee"/><stop offset="0.45" stop-color="#1c5fa3"/><stop offset="1" stop-color="#061425"/></radialGradient>
+        </defs>
+        <rect x="100" y="100" width="824" height="824" rx="186" fill="url(#lg-body)" stroke="#c3c9d1" stroke-width="8"/>
+        <circle cx="232" cy="232" r="34" fill="#e5372b"/>
+        <rect x="690" y="202" width="118" height="60" rx="18" fill="#c5cbd3"/>
+        <circle cx="512" cy="548" r="262" fill="url(#lg-ring)"/>
+        <circle cx="512" cy="548" r="222" fill="#0e1014"/>
+        <circle cx="512" cy="548" r="190" fill="url(#lg-glass)"/>
+        <circle cx="512" cy="548" r="78" fill="#050a12"/>
+        <ellipse cx="438" cy="466" rx="58" ry="36" fill="#ffffff" opacity="0.38" transform="rotate(-35 438 466)"/>
+        <circle cx="574" cy="618" r="16" fill="#ffffff" opacity="0.22"/>
+      </svg>
+      4xs.dev / EOS Webcam
+    </div>
+    <button class="theme" id="theme" type="button">Dark theme</button>
+  </header>
+
+  <section class="col">
+    <h1>A Canon EOS 80D as a Mac webcam, with the USB cable you already have</h1>
+    <p class="lede">Canon's own webcam app freezes on macOS 26. This setup replaces it with one small script and a free virtual camera, so the 80D shows up in Zoom, Meet or Detail like any other camera.</p>
+    <div class="facts">
+      <div><b>960×640</b><span>live view from the camera, about 15 fps</span></div>
+      <div><b>1280×720</b><span>virtual camera output, 30 fps</span></div>
+      <div><b>≈1% CPU</b><span>Isocast engine on a Mac mini</span></div>
+      <div><b>0 windows</b><span>everything runs in the background</span></div>
+    </div>
+  </section>
+
+  <section class="col">
+    <h2>The problem</h2>
+    <p>The 80D sends its live view over Mini-USB, but macOS only lists a camera in call apps when a signed camera extension provides it. Canon's EOS Webcam Utility is that extension, and on current macOS it freezes.</p>
+    <p>Writing your own extension needs a paid Apple Developer account. The way around it is to borrow an extension that is already signed: <a href="https://github.com/anomalyco/isocast">Isocast</a>, an open-source recording app whose virtual camera can be driven from the command line.</p>
+  </section>
+
+  <section class="wide wf" aria-labelledby="wf-title">
+    <h2 id="wf-title">How a frame travels from the sensor to the call</h2>
+    <p class="sub">Click a step to see what it does and what it passes on. Click the background to reset.</p>
+    <div class="wf-scroll" id="wfScroll">
+      <div class="wf-fit" id="wfFit">
+        <div class="stage" id="stage"><svg id="edges" aria-hidden="true"></svg></div>
+      </div>
+    </div>
+    <div class="wf-info" id="info"><b>The short version.</b> gphoto2 pulls JPEG frames from the camera, the script keeps the newest one, Isocast renders it as a 720p picture and offers it to every app as “Isocast Virtual Camera”. When no frame arrives, a text card takes its place.</div>
+    <div class="legend">
+      <span><i style="background:#3B82F6"></i>Trigger</span>
+      <span><i style="background:#10B981"></i>Processing</span>
+      <span><i style="background:#F59E0B"></i>Tool or device</span>
+      <span><i style="background:#EF4444"></i>Output</span>
+      <span><i style="background:#6366F1"></i>Data store</span>
+      <span><i style="background:#A855F7"></i>Decision</span>
+    </div>
+  </section>
+
+  <section class="col">
+    <h2>What you need</h2>
+    <p>A Mac with Apple silicon and macOS 14 or later, Homebrew, and a Canon camera that gphoto2 can read live view from. It was built and tested with an EOS 80D on a Mac mini running macOS 26.5.</p>
+    <p>The installer adds Node, gphoto2 and Isocast 0.0.10 if they are missing. Isocast is downloaded from its GitHub release and checked against a known checksum before it is copied to Applications.</p>
+  </section>
+
+  <section class="col">
+    <h2>Setup</h2>
+    <ol class="steps">
+      <li><div>Unzip <code>EOS-Webcam.zip</code> anywhere.</div></li>
+      <li><div>Double-click <code>install.command</code>. If macOS refuses, right-click it and choose Open.</div></li>
+      <li><div>Connect the camera by USB, switch it on in movie mode and set Auto power off to Disable.</div></li>
+      <li><div>Double-click <code>start.command</code>.</div></li>
+      <li><div>The first time only, allow <b>Isocast Virtual Camera</b> in System Settings → General → Login Items &amp; Extensions → Camera Extensions.</div></li>
+      <li><div>Choose <b>Isocast Virtual Camera</b> as the camera in your call app.</div></li>
+    </ol>
+  </section>
+
+  <section class="col">
+    <h2>Daily use</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>File</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>start.command</code></td><td>Starts the camera stream and the virtual camera.</td></tr>
+          <tr><td><code>stop.command</code></td><td>Stops the stream and frees the camera for other apps. Call apps then show “Camera is not live”.</td></tr>
+          <tr><td><code>quit.command</code></td><td>Stops the stream and shuts Isocast down completely.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:12px">A preview with Start and Stop buttons is at <code>http://127.0.0.1:8809</code> while the script runs. Close EOS Utility and similar apps first, since only one program can hold the camera.</p>
+  </section>
+
+  <section class="col">
+    <h2>Limits</h2>
+    <p>The picture is the camera's USB live view, so it tops out at 960×640 and about 15 fps. It is cropped to 16:9 and scaled to 720p. For full 1080p, the camera's Mini-HDMI output with an HDMI capture dongle is the better route and needs no software at all.</p>
+    <p>Isocast calls itself alpha software, and it cannot open a network stream directly yet. That is why the script serves a bare page at <code>/view</code>, which Isocast renders as a web page source.</p>
+    <p>If Isocast breaks after an update, the package also carries an OBS route: <code>install-obs.command</code> once, then <code>start-obs.command</code> and <code>stop-obs.command</code>, with the camera named “OBS Virtual Camera”.</p>
+  </section>
+
+  <footer class="col">Built by Pavel Kotyza, <a href="https://www.4xs.dev">4xs.dev</a>. Not affiliated with Canon. Uses gphoto2 and Isocast, both open source.</footer>
+</div>
+
+<script>
+// Theme switch: light by default, follows the viewer's setting until the button is used.
+(function(){
+  var root=document.documentElement, btn=document.getElementById('theme');
+  function isDark(){var t=root.getAttribute('data-theme');return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches}
+  function label(){btn.textContent=isDark()?'Light theme':'Dark theme'}
+  try{var s=localStorage.getItem('eos-theme');if(s)root.setAttribute('data-theme',s)}catch(e){}
+  btn.addEventListener('click',function(){var t=isDark()?'light':'dark';root.setAttribute('data-theme',t);try{localStorage.setItem('eos-theme',t)}catch(e){}label()});
+  label();
+})();
+
+// Workflow diagram
+(function(){
+  var W=1110,H=560,NW=170,NH=104;
+  var COLORS={trigger:'#3B82F6',process:'#10B981',tool:'#F59E0B',output:'#EF4444',store:'#6366F1',decision:'#A855F7'};
+  var nodes=[
+    {id:'start',t:'trigger',x:20,y:36,ic:'⚡',lb:'Run start.command',st:'Double-click the launcher',
+     d:'Starts the Node script, then tells Isocast to start its engine and its virtual camera. No window opens.'},
+    {id:'free',t:'process',x:245,y:36,ic:'🔓',lb:'Release the camera',st:'Stop macOS ptpcamerad',
+     d:'macOS grabs every connected camera with its ptpcamerad service. The script stops that service so gphoto2 can claim the USB device. macOS restarts it later by itself.'},
+    {id:'gphoto',t:'tool',x:470,y:36,ic:'🛠',lb:'gphoto2',st:'Reads live view over USB',
+     d:'Runs “gphoto2 --capture-movie --stdout”. It switches the camera to live view and writes one JPEG after another to its output, about 15 per second.'},
+    {id:'script',t:'process',x:695,y:36,ic:'⚙️',lb:'Split JPEG frames',st:'eos-webcam.js on port 8809',
+     d:'The Node script cuts gphoto2’s byte stream into single JPEG frames and runs a small web server on 127.0.0.1:8809 with the preview page, /view, /frame and /stream.'},
+    {id:'store',t:'store',x:920,y:36,ic:'🗂',lb:'Newest frame',st:'Kept in memory, served at /frame',
+     d:'Only the latest frame is kept. Anything that asks for /frame gets the most recent picture, so a slow viewer never falls behind.'},
+    {id:'camera',t:'tool',x:470,y:228,ic:'📷',lb:'Canon EOS 80D',st:'Movie mode, Mini-USB cable',
+     d:'The camera sends its live view as 960×640 JPEG images over the normal USB data cable. Auto power off must be disabled or it switches off mid-call.'},
+    {id:'live',t:'decision',x:920,y:228,ic:'❓',lb:'Live frame available?',st:'Is the camera streaming',
+     d:'While gphoto2 runs, /frame answers with a JPEG. When the camera is stopped, off or unplugged, it answers 503 and the /view page hides its picture.'},
+    {id:'compose',t:'process',x:695,y:420,ic:'🎬',lb:'Compose 720p scene',st:'Isocast renders the /view page',
+     d:'Isocast loads http://127.0.0.1:8809/view as a web page source at 1280×720 and 30 fps. The page is transparent wherever it has no picture, so the layer behind it shows through.'},
+    {id:'card',t:'process',x:920,y:420,ic:'🪧',lb:'Show “Camera is not live”',st:'Text layer behind the picture',
+     d:'A text source in the Isocast scene, placed behind the camera picture. Callers see it instead of a frozen or black image whenever the camera is not streaming.'},
+    {id:'vcam',t:'tool',x:470,y:420,ic:'🎥',lb:'Isocast Virtual Camera',st:'Signed camera extension',
+     d:'Isocast’s camera extension is signed and notarized, which is what lets macOS list it as a camera. You approve it once in System Settings.'},
+    {id:'apps',t:'output',x:245,y:420,ic:'✅',lb:'Zoom, Meet, Detail',st:'Pick it like any webcam',
+     d:'Any app with a camera menu can select “Isocast Virtual Camera”. Restart the app if it was open before the camera first appeared.'}
+  ];
+  var edges=[
+    ['start','free','launch'],
+    ['free','gphoto','USB device freed'],
+    ['camera','gphoto','JPEGs over USB'],
+    ['gphoto','script','MJPEG on stdout'],
+    ['script','store','newest JPEG'],
+    ['store','live','GET /frame'],
+    ['live','compose','Yes: JPEG shown'],
+    ['live','card','No: 503'],
+    ['card','compose','text layer'],
+    ['compose','vcam','1280×720 program'],
+    ['vcam','apps','camera feed, 30 fps']
+  ];
+  var stage=document.getElementById('stage'),svg=document.getElementById('edges'),info=document.getElementById('info');
+  var fit=document.getElementById('wfFit'),scroll=document.getElementById('wfScroll');
+  var NS='http://www.w3.org/2000/svg',byId={},defaultInfo=info.innerHTML;
+  function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e}
+
+  var defs=el('defs',{});
+  Object.keys(COLORS).concat(['idle']).forEach(function(k){
+    var m=el('marker',{id:'ar-'+k,viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'7',markerHeight:'7',orient:'auto-start-reverse'});
+    m.appendChild(el('path',{d:'M0 0L10 5L0 10z',fill:k==='idle'?'#444':COLORS[k]}));defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+
+  nodes.forEach(function(n){
+    byId[n.id]=n;
+    var b=document.createElement('button');
+    b.type='button';b.className='node t-'+n.t;b.style.left=n.x+'px';b.style.top=n.y+'px';b.title=n.d;
+    b.innerHTML='<span class="ic" aria-hidden="true">'+n.ic+'</span><span class="lb">'+n.lb+'</span><span class="st">'+n.st+'</span>';
+    b.addEventListener('click',function(ev){ev.stopPropagation();select(n.id)});
+    n.el=b;stage.appendChild(b);
+  });
+
+  function anchor(a,b){
+    var ax=a.x+NW/2,ay=a.y+NH/2,bx=b.x+NW/2,by=b.y+NH/2,dx=bx-ax,dy=by-ay;
+    if(Math.abs(dx)>=Math.abs(dy)*1.2){var s=dx>0?1:-1;return [ax+s*NW/2,ay,bx-s*(NW/2+4),by]}
+    var v=dy>0?1:-1;return [ax,ay+v*NH/2,bx,by-v*(NH/2+4)];
+  }
+  edges.forEach(function(e){
+    var a=byId[e[0]],b=byId[e[1]],p=anchor(a,b);
+    var path=el('path',{class:'edge',d:'M'+p[0]+' '+p[1]+'L'+p[2]+' '+p[3],'marker-end':'url(#ar-idle)'});
+    svg.appendChild(path);
+    var mx=(p[0]+p[2])/2,my=(p[1]+p[3])/2;
+    if(p[1]===p[3])my=Math.max(a.y,b.y)+NH+18; // horizontal edge: label sits under the gap, clear of the nodes
+    var text=el('text',{class:'elabel',x:mx,y:my+4,'text-anchor':'middle'});text.textContent=e[2];
+    svg.appendChild(text);
+    var w=e[2].length*6.8+10,bg=el('rect',{class:'elabel-bg',x:mx-w/2,y:my-9,width:w,height:18,rx:4});
+    svg.insertBefore(bg,text);
+    e.path=path;e.text=text;e.bg=bg;e.color=COLORS[a.t];e.type=a.t;
+  });
+
+  function select(id){
+    var n=byId[id],near={};near[id]=1;
+    edges.forEach(function(e){
+      var hit=e[0]===id||e[1]===id;
+      if(hit){near[e[0]]=1;near[e[1]]=1}
+      e.path.setAttribute('class','edge'+(hit?' hot':' dim'));
+      e.path.style.stroke=hit?e.color:'';
+      e.path.setAttribute('marker-end','url(#ar-'+(hit?e.type:'idle')+')');
+      e.text.style.opacity=e.bg.style.opacity=hit?1:.25;
+    });
+    nodes.forEach(function(m){m.el.classList.toggle('dim',!near[m.id]);m.el.classList.toggle('on',m.id===id)});
+    var ins=edges.filter(function(e){return e[1]===id}).map(function(e){return e[2]+' from “'+byId[e[0]].lb+'”'});
+    var outs=edges.filter(function(e){return e[0]===id}).map(function(e){return e[2]+' to “'+byId[e[1]].lb+'”'});
+    info.innerHTML='<b>'+n.lb+(/[?.]$/.test(n.lb)?'':'.')+'</b> '+n.d+(ins.length?'<br>Receives: '+ins.join('; ')+'.':'')+(outs.length?'<br>Passes on: '+outs.join('; ')+'.':'');
+  }
+  function reset(){
+    edges.forEach(function(e){e.path.setAttribute('class','edge');e.path.style.stroke='';e.path.setAttribute('marker-end','url(#ar-idle)');e.text.style.opacity=e.bg.style.opacity=1});
+    nodes.forEach(function(m){m.el.classList.remove('dim','on')});info.innerHTML=defaultInfo;
+  }
+  stage.addEventListener('click',reset);
+
+  function resize(){
+    var s=Math.max(0.62,Math.min(1,scroll.clientWidth/W));
+    stage.style.transform='scale('+s+')';fit.style.width=(W*s)+'px';fit.style.height=(H*s)+'px';
+  }
+  window.addEventListener('resize',resize);resize();
+})();
+</script>
+</body>
+</html>
