@@ -2,3 +2,4 @@
 # Private launcher and local build artefacts
 detail/
 *.zip
+.wrangler/

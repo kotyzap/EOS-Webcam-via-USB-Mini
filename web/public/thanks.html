@@ -1,0 +1,40 @@
+<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8">
+<title>Thank you - EOS Webcam</title><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--bg:#f6f7f9;--fg:#1c1e21;--card:#fff;--line:#d9dce1;--acc:#0a66c2}
+[data-theme=dark]{--bg:#16181c;--fg:#e8eaed;--card:#22252b;--line:#3a3f47;--acc:#5aa9f5}
+body{margin:0;font:16px/1.5 -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+main{max-width:640px;margin:0 auto;padding:32px 16px}
+header{display:flex;align-items:center}h1{flex:1;font-size:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:16px 0}
+input,button{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg)}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff;cursor:pointer}
+#key{word-break:break-all;font:13px ui-monospace,monospace;background:var(--bg);padding:10px;border-radius:6px}
+footer{opacity:.6;font-size:13px}
+</style></head><body><main>
+<header><h1>Thank you for supporting EOS Webcam</h1><button id="th">Dark</button></header>
+<p>Your licence key is on its way by email. It unlocks brightness, contrast, saturation and mirror.</p>
+<div class="card"><p>Get it here right away: the email you paid with on Ko-fi</p>
+<input id="em" type="email" placeholder="you@example.com" size="30"> <button class="p" id="go">Show my key</button>
+<p id="msg"></p><div id="key" hidden></div> <button id="copy" hidden>Copy key</button></div>
+<div class="card"><b>How to use it</b><ol>
+<li>Click the EOS Webcam camera icon in the menu bar.</li>
+<li>Choose <b>Unlock picture controls</b>, paste the key, click <b>Save key</b>.</li></ol>
+Or paste it on the preview page: <a href="http://127.0.0.1:8809">127.0.0.1:8809</a>. The key is checked on your Mac; no internet needed.</div>
+<footer>4xs.dev - Pavel Kotyza</footer>
+</main><script>
+const $=(i)=>document.getElementById(i),root=document.documentElement;
+function theme(t){root.dataset.theme=t;$('th').textContent=t==='dark'?'Light':'Dark';try{localStorage.theme=t}catch(e){}}
+try{if(localStorage.theme)theme(localStorage.theme)}catch(e){}
+$('th').onclick=()=>theme(root.dataset.theme==='dark'?'light':'dark');
+let tries=0;
+async function ask(){
+  const r=await fetch('/api/key',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:$('em').value})});
+  const j=await r.json().catch(()=>({}));
+  if(j.key){$('msg').textContent='Your licence key:';$('key').textContent=j.key;$('key').hidden=$('copy').hidden=false;return}
+  if(j.pending&&++tries<20){$('msg').textContent='Waiting for Ko-fi to confirm the payment...';return setTimeout(ask,3000)}
+  $('msg').textContent=j.error||'Not found yet. The key will arrive by email; reply to it if it does not.';
+}
+$('go').onclick=()=>{tries=0;ask()};
+$('copy').onclick=()=>navigator.clipboard.writeText($('key').textContent).then(()=>$('copy').textContent='Copied');
+</script></body></html>

@@ -121,6 +121,8 @@ Below them, the menu has picture controls. The preview page has the same ones:
 
 The menu and the page stay in step, and the settings are kept in `~/.eos-webcam.json`.
 
+The picture controls need a licence key: **5 EUR once** on [Ko-fi](https://ko-fi.com/s/bdcde4b564). The key arrives by email; choose **Unlock picture controls** in the menu (or use the preview page), paste it and click Save key. It is checked on your Mac, with no internet needed, and kept in `~/.eos-webcam-key`. Everything else is free.
+
 <br clear="right">
 
 To start EOS Webcam with the Mac, add it under System Settings > General > Login Items.
@@ -159,10 +161,11 @@ Quit EOS Webcam from its menu and delete **EOS Webcam.app** from Applications. T
 |---|---|
 | `install.command` | The installer. Builds the app from `src/` on your Mac, so macOS does not block it as a downloaded app. |
 | `src/EOSWebcamMenu.swift` | The menu bar app. |
-| `src/eos-webcam.js` | The Node script, no dependencies. Endpoints: `/` preview, `/view`, `/frame`, `/stream`, `/api/start`, `/api/stop`, `/api/status`, `/api/adjust` (for example `POST /api/adjust?contrast=120&mirror=1`). |
+| `src/eos-webcam.js` | The Node script, no dependencies. Endpoints: `/` preview, `/view`, `/frame`, `/stream`, `/api/start`, `/api/stop`, `/api/status`, `/api/adjust` (for example `POST /api/adjust?contrast=120&mirror=1`, needs a licence key), `/api/licence` (POST the key as the body). |
 | `src/start.sh` | What Start camera runs. |
 | `src/setup.toml` | Virtual camera scene: the `/view` page over the text card. |
 | `docs/` | The explainer page served by GitHub Pages. |
+| `web/` | eos.4xs.dev (Cloudflare Pages): the Ko-fi webhook that emails licence keys, and the thank-you page. |
 
 ## Built on
 

@@ -1,0 +1,15 @@
+# eos.4xs.dev — Ko-fi licence keys for EOS Webcam. Deploy: cd web && npx wrangler pages deploy
+# Secrets (not here): KOFI_VERIFICATION_TOKEN, EOS_SIGNING_KEY, CF_EMAIL_TOKEN — see functions/api/kofi.js
+name = "eos-4xs"
+pages_build_output_dir = "public"
+compatibility_date = "2026-11-01"
+
+[vars]
+KOFI_SHOP_CODE = "bdcde4b564"
+CF_ACCOUNT_ID = "66fdaaf4171e65d46f748f8aadc4e31a"
+MAIL_FROM = "eos@mail.4xs.dev"
+MAIL_REPLY_TO = "kotyza@gmail.com"
+
+[[kv_namespaces]]
+binding = "EOS_KEYS"
+id = "5d91858255674b5e9efdd4f0f508f851"

@@ -45,6 +45,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let adjustments: [(String, String, Double, Double)] = [
         ("Brightness", "brightness", 50, 150), ("Contrast", "contrast", 50, 150), ("Saturation", "saturation", 0, 200)]
     var sliders: [String: (NSSlider, NSTextField, String)] = [:]
+    // Picture controls are locked until a licence key is saved (see eos-webcam.js).
+    let unlock = NSMenuItem(title: "Unlock picture controls (5 EUR)...", action: #selector(AppDelegate.enterKey), keyEquivalent: "")
+    var reset: NSMenuItem?
+    var buyURL = "https://ko-fi.com/pavelk"
     let mirror = NSMenuItem(title: "Mirror image", action: #selector(AppDelegate.toggleMirror), keyEquivalent: "")
     // Live preview in the menu: the /view page, the same picture the virtual camera shows. Loaded only while the menu is open.
     // Width of the preview and slider rows; they also stretch to the menu's width (set by its widest line, the battery line).
@@ -74,6 +78,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         mirror.attributedTitle = dotted("Mirror image", .clear) // lines up with the other items
         menu.addItem(mirror)
         add(menu, "Reset picture", #selector(resetPicture), .clear)
+        reset = menu.items.last
+        unlock.target = self
+        unlock.attributedTitle = dotted("Unlock picture controls (5 EUR)...", .systemBlue)
+        menu.addItem(unlock)
+        menu.autoenablesItems = false
         menu.addItem(.separator())
         add(menu, "Open preview", #selector(openPreview), .clear)
         add(menu, "Quit EOS Webcam", #selector(quitApp), .clear)
@@ -229,7 +238,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             var text = "Camera is off", color = NSColor.systemRed
             var level: String? = nil
             var picture: [String: Double] = [:]
+            var licensed = true
+            var buy: String? = nil
             if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                licensed = json["licensed"] as? Bool ?? true
+                buy = json["buy"] as? String
                 for (key, value) in json["adjust"] as? [String: Any] ?? [:] {
                     if let number = value as? NSNumber { picture[key] = number.doubleValue }
                 }
@@ -247,6 +260,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self.show(text: text, color: color, battery: level)
                 for (key, value) in picture where self.sliders[key]?.0 !== self.tracking { self.setSlider(key, value) }
                 if let value = picture["mirror"] { self.mirror.state = value == 1 ? .on : .off }
+                for (slider, _, _) in self.sliders.values { slider.isEnabled = licensed }
+                self.mirror.isEnabled = licensed
+                self.reset?.isEnabled = licensed
+                self.unlock.isHidden = licensed
+                if let link = buy { self.buyURL = link }
             }
             CFRunLoopWakeUp(CFRunLoopGetMain())
         }.resume()
@@ -266,6 +284,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // Turn off: end the script. The virtual camera keeps running and shows the "not live" card.
     @objc func turnOff() { run("/usr/bin/pkill", ["-INT", "-f", "node eos-webcam.js"]) }
+
+    // Ask for the licence key; "Buy on Ko-fi" opens the shop item.
+    @objc func enterKey() {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = "Unlock picture controls"
+        alert.informativeText = "Brightness, contrast, saturation and mirror: 5 EUR once on Ko-fi. The licence key arrives by email. Paste it here."
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 320, height: 24))
+        field.placeholderString = "EW1..."
+        alert.accessoryView = field
+        alert.addButton(withTitle: "Save key")
+        alert.addButton(withTitle: "Buy on Ko-fi")
+        alert.addButton(withTitle: "Cancel")
+        alert.window.initialFirstResponder = field
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            var request = URLRequest(url: URL(string: api + "/api/licence")!)
+            request.httpMethod = "POST"
+            request.httpBody = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8)
+            URLSession.shared.dataTask(with: request) { _, response, _ in
+                let ok = (response as? HTTPURLResponse)?.statusCode == 200
+                DispatchQueue.main.async {
+                    let done = NSAlert()
+                    done.messageText = ok ? "Unlocked. Thank you!" : "This key is not valid (or EOS Webcam is not running)."
+                    done.runModal()
+                    self.refresh()
+                }
+            }.resume()
+        case .alertSecondButtonReturn:
+            if let url = URL(string: buyURL) { NSWorkspace.shared.open(url) }
+        default: break
+        }
+    }
 
     @objc func openPreview() { NSWorkspace.shared.open(URL(string: api)!) }
 
