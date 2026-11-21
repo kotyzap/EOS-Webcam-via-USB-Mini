@@ -102,7 +102,7 @@ The installer puts **EOS Webcam.app** in Applications. After that you can delete
 
 ## Using it
 
-<img src="docs/img/menu.png" width="362" align="right" alt="EOS Webcam menu: status, battery, Start, Stop, Turn off, live preview, Brightness, Contrast and Saturation sliders, Mirror image, Reset picture">
+<img src="docs/img/menu.png" width="347" align="right" alt="EOS Webcam menu: status, battery, Start, Stop, Turn off, live preview, Brightness, Contrast and Saturation sliders, Mirror image and Reset in one box">
 
 Everything is in the menu bar icon. The lens colour shows the state, and each menu item carries the colour it leads to.
 
