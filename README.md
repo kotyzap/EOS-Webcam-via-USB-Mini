@@ -51,7 +51,11 @@ Everything is in the menu bar icon. The lens colour shows the state, and each me
 | Stop camera | Orange | Frees the camera for other apps. Call apps show a "Camera is not live" card. |
 | Turn off | Red | Ends the background script as well. The card stays. |
 
-The menu also shows the camera's battery level (read when the stream starts) and opens a preview page at `http://127.0.0.1:8809`. To start EOS Webcam with the Mac, add it under System Settings > General > Login Items.
+The menu also shows the camera's battery level (read when the stream starts) and opens a preview page at `http://127.0.0.1:8809`.
+
+The menu and the preview page both have a live preview, Brightness, Contrast and Saturation sliders, a Mirror switch and Reset. They change the picture call apps get, stay in step with each other and are kept in `~/.eos-webcam.json`.
+
+To start EOS Webcam with the Mac, add it under System Settings > General > Login Items.
 
 ## How it works
 
@@ -87,7 +91,7 @@ Quit EOS Webcam from its menu and delete **EOS Webcam.app** from Applications. T
 |---|---|
 | `install.command` | The installer. Builds the app from `src/` on your Mac, so macOS does not block it as a downloaded app. |
 | `src/EOSWebcamMenu.swift` | The menu bar app. |
-| `src/eos-webcam.js` | The Node script, no dependencies. Endpoints: `/` preview, `/view`, `/frame`, `/stream`, `/api/start`, `/api/stop`, `/api/status`. |
+| `src/eos-webcam.js` | The Node script, no dependencies. Endpoints: `/` preview, `/view`, `/frame`, `/stream`, `/api/start`, `/api/stop`, `/api/status`, `/api/adjust` (for example `POST /api/adjust?contrast=120&mirror=1`). |
 | `src/start.sh` | What Start camera runs. |
 | `src/setup.toml` | Virtual camera scene: the `/view` page over the text card. |
 | `docs/` | The explainer page served by GitHub Pages. |

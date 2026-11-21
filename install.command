@@ -29,6 +29,7 @@ fi
 # Build the menu bar app on this Mac, so macOS does not block it as a downloaded app.
 A="/Applications/EOS Webcam.app"
 pkill -x EOSWebcam 2>/dev/null
+pkill -INT -f "node eos-webcam.js" 2>/dev/null # the old script, so the new one starts
 rm -rf "$A" && mkdir -p "$A/Contents/MacOS" "$A/Contents/Resources"
 swiftc -O -o "$A/Contents/MacOS/EOSWebcam" src/EOSWebcamMenu.swift || { echo "Build failed. Install the tools with: xcode-select --install"; exit 1; }
 cp src/Info.plist "$A/Contents/Info.plist"

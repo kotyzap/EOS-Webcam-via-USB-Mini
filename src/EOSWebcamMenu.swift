@@ -2,6 +2,7 @@
 // Author: Pavel Kotyza <kotyza@gmail.com> - 4xs.dev
 // Built by install.command. The app carries eos-webcam.js, setup.toml and start.sh in Contents/Resources.
 import Cocoa
+import WebKit
 
 func circle(_ x: CGFloat, _ y: CGFloat, _ r: CGFloat) -> NSRect {
     NSRect(x: x - r, y: y - r, width: 2 * r, height: 2 * r)
@@ -33,13 +34,28 @@ func cameraIcon(lens: NSColor, points: CGFloat = 18) -> NSImage {
     return image
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let status = NSMenuItem(title: "Checking...", action: nil, keyEquivalent: "")
     let battery = NSMenuItem(title: "", action: nil, keyEquivalent: "")
     let api = "http://127.0.0.1:8809"
     // Optional Info.plist key "EOSOpenApp": an app to open, together with the camera, whenever this app is opened.
     let companion = Bundle.main.object(forInfoDictionaryKey: "EOSOpenApp") as? String
+    // Picture sliders: title, API key, range in percent (same ranges as eos-webcam.js).
+    let adjustments: [(String, String, Double, Double)] = [
+        ("Brightness", "brightness", 50, 150), ("Contrast", "contrast", 50, 150), ("Saturation", "saturation", 0, 200)]
+    var sliders: [String: (NSSlider, NSTextField, String)] = [:]
+    let mirror = NSMenuItem(title: "Mirror image", action: #selector(AppDelegate.toggleMirror), keyEquivalent: "")
+    // Live preview in the menu: the /view page, the same picture the virtual camera shows. Loaded only while the menu is open.
+    // Width of the preview and slider rows; they also stretch to the menu's width (set by its widest line, the battery line).
+    static let panel: CGFloat = 340
+    let preview = WKWebView(frame: NSRect(x: 18, y: 4, width: AppDelegate.panel - 36, height: (AppDelegate.panel - 36) * 9 / 16))
+    // One connection, so slider updates reach the script in order.
+    let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.httpMaximumConnectionsPerHost = 1
+        return URLSession(configuration: config)
+    }()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let menu = NSMenu()
@@ -52,12 +68,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         add(menu, "Stop camera", #selector(stopCamera), .systemOrange)
         add(menu, "Turn off", #selector(turnOff), .systemRed)
         menu.addItem(.separator())
+        menu.addItem(previewItem())
+        for (title, key, low, high) in adjustments { addSlider(menu, title, key, low, high) }
+        mirror.target = self
+        mirror.attributedTitle = dotted("Mirror image", .clear) // lines up with the other items
+        menu.addItem(mirror)
+        add(menu, "Reset picture", #selector(resetPicture), .clear)
+        menu.addItem(.separator())
         add(menu, "Open preview", #selector(openPreview), .clear)
         add(menu, "Quit EOS Webcam", #selector(quitApp), .clear)
+        menu.delegate = self
         item.menu = menu
         show(text: "Checking...", color: .systemGray, battery: nil)
         refresh()
-        Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in self?.refresh() }
+        // .common mode: keeps refreshing while the menu is open, so its sliders follow the preview page.
+        RunLoop.main.add(Timer(timeInterval: 1, repeats: true) { [weak self] _ in self?.refresh() }, forMode: .common)
         openCompanion()
     }
 
@@ -86,6 +111,97 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(entry)
     }
 
+    // Black card with "Camera is not live" behind the transparent preview, like the virtual camera's card.
+    func previewItem() -> NSMenuItem {
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: AppDelegate.panel, height: preview.frame.height + 8))
+        view.autoresizingMask = [.width]
+        let card = NSView(frame: preview.frame)
+        card.autoresizingMask = [.width]
+        preview.autoresizingMask = [.width]
+        card.wantsLayer = true
+        card.layer?.backgroundColor = NSColor.black.cgColor
+        card.layer?.cornerRadius = 6
+        let label = NSTextField(labelWithString: "Camera is not live")
+        label.font = .systemFont(ofSize: 11)
+        label.textColor = .gray
+        label.sizeToFit()
+        label.frame.origin = NSPoint(x: (card.frame.width - label.frame.width) / 2, y: (card.frame.height - label.frame.height) / 2)
+        label.autoresizingMask = [.minXMargin, .maxXMargin]
+        card.addSubview(label)
+        preview.setValue(false, forKey: "drawsBackground")
+        preview.wantsLayer = true
+        preview.layer?.cornerRadius = 6
+        preview.layer?.masksToBounds = true
+        view.addSubview(card)
+        view.addSubview(preview)
+        let entry = NSMenuItem()
+        entry.view = view
+        return entry
+    }
+
+    func addSlider(_ menu: NSMenu, _ title: String, _ key: String, _ low: Double, _ high: Double) {
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: AppDelegate.panel, height: 42))
+        view.autoresizingMask = [.width]
+        let label = NSTextField(labelWithString: title)
+        label.font = .menuFont(ofSize: 12)
+        label.textColor = .secondaryLabelColor
+        label.frame = NSRect(x: 20, y: 22, width: AppDelegate.panel - 40, height: 16)
+        let slider = NSSlider(value: 100, minValue: low, maxValue: high, target: self, action: #selector(slid(_:)))
+        slider.isContinuous = true
+        slider.identifier = NSUserInterfaceItemIdentifier(key)
+        slider.frame = NSRect(x: 18, y: 2, width: AppDelegate.panel - 36, height: 20)
+        slider.autoresizingMask = [.width]
+        view.addSubview(label)
+        view.addSubview(slider)
+        let entry = NSMenuItem()
+        entry.view = view
+        menu.addItem(entry)
+        sliders[key] = (slider, label, title)
+    }
+
+    func setSlider(_ key: String, _ value: Double) {
+        guard let entry = sliders[key] else { return }
+        entry.0.doubleValue = value
+        entry.1.stringValue = "\(entry.2)  \(Int(value))%"
+    }
+
+    func post(_ path: String) {
+        var request = URLRequest(url: URL(string: api + path)!)
+        request.httpMethod = "POST"
+        session.dataTask(with: request).resume()
+    }
+
+    // The menu slider being dragged; refresh() leaves it alone until the mouse is released.
+    var tracking: NSSlider?
+
+    @objc func slid(_ slider: NSSlider) {
+        guard let key = slider.identifier?.rawValue else { return }
+        let released = NSApp.currentEvent?.type == .leftMouseUp
+        tracking = released ? nil : slider
+        setSlider(key, slider.doubleValue.rounded())
+        post("/api/adjust?\(key)=\(Int(slider.doubleValue.rounded()))")
+    }
+
+    // Flips the picture left to right, for the preview and the virtual camera.
+    @objc func toggleMirror() {
+        mirror.state = mirror.state == .on ? .off : .on
+        post("/api/adjust?mirror=\(mirror.state == .on ? 1 : 0)")
+    }
+
+    @objc func resetPicture() {
+        for (_, key, _, _) in adjustments { setSlider(key, 100) }
+        post("/api/adjust?brightness=100&contrast=100&saturation=100")
+    }
+
+    // Show the current values (they may have been changed on the preview page).
+    func menuWillOpen(_ menu: NSMenu) {
+        refresh()
+        preview.load(URLRequest(url: URL(string: api + "/view")!))
+    }
+
+    // Stop the preview when the menu closes, so it does not keep fetching frames.
+    func menuDidClose(_ menu: NSMenu) { preview.loadHTMLString("", baseURL: nil) }
+
     func run(_ tool: String, _ arguments: [String]) {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: tool)
@@ -112,7 +228,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         URLSession.shared.dataTask(with: request) { data, _, _ in
             var text = "Camera is off", color = NSColor.systemRed
             var level: String? = nil
+            var picture: [String: Double] = [:]
             if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                for (key, value) in json["adjust"] as? [String: Any] ?? [:] {
+                    if let number = value as? NSNumber { picture[key] = number.doubleValue }
+                }
                 if json["running"] as? Bool == true {
                     color = .systemGreen
                     text = "Camera is live (\(json["fps"] as? Int ?? 0) fps)"
@@ -122,7 +242,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     color = .systemOrange
                 }
             }
-            DispatchQueue.main.async { self.show(text: text, color: color, battery: level) }
+            // RunLoop instead of DispatchQueue, so the update also runs while the menu is open.
+            RunLoop.main.perform(inModes: [.common]) {
+                self.show(text: text, color: color, battery: level)
+                for (key, value) in picture where self.sliders[key]?.0 !== self.tracking { self.setSlider(key, value) }
+                if let value = picture["mirror"] { self.mirror.state = value == 1 ? .on : .off }
+            }
+            CFRunLoopWakeUp(CFRunLoopGetMain())
         }.resume()
     }
 
