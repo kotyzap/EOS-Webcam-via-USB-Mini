@@ -11,6 +11,8 @@
 
 ---
 
+<img src="docs/img/setup.jpg" width="100%" alt="Canon EOS 80D on a small tripod next to a Mac monitor showing the EOS Webcam preview page streaming at 15 fps">
+
 Canon's EOS Webcam Utility freezes on macOS 26. This project replaces it with one small menu bar app and a free virtual camera, so the camera shows up in Zoom, Meet or Detail like any other webcam.
 
 | | |
