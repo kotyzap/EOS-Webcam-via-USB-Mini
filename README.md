@@ -123,6 +123,8 @@ The menu and the page stay in step, and the settings are kept in `~/.eos-webcam.
 
 The picture controls need a licence key: **5 EUR once** on [Ko-fi](https://ko-fi.com/s/bdcde4b564). The key arrives by email; choose **Unlock picture controls** in the menu (or use the preview page), paste it and click Save key. It is checked on your Mac, with no internet needed, and kept in `~/.eos-webcam-key`. Everything else is free.
 
+<img src="docs/img/free-vs-unlocked.png" width="600" alt="Free vs 5 EUR unlocked: locked menu with greyed sliders next to the unlocked menu">
+
 <br clear="right">
 
 To start EOS Webcam with the Mac, add it under System Settings > General > Login Items.

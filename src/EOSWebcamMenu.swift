@@ -34,6 +34,10 @@ func cameraIcon(lens: NSColor, points: CGFloat = 18) -> NSImage {
     return image
 }
 
+final class FlippedView: NSView {
+    override var isFlipped: Bool { true }
+}
+
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     let status = NSMenuItem(title: "Checking...", action: nil, keyEquivalent: "")
@@ -45,11 +49,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let adjustments: [(String, String, Double, Double)] = [
         ("Brightness", "brightness", 50, 150), ("Contrast", "contrast", 50, 150), ("Saturation", "saturation", 0, 200)]
     var sliders: [String: (NSSlider, NSTextField, String)] = [:]
-    // Picture controls are locked until a licence key is saved (see eos-webcam.js).
-    let unlock = NSMenuItem(title: "Unlock picture controls (5 EUR)...", action: #selector(AppDelegate.enterKey), keyEquivalent: "")
-    var reset: NSMenuItem?
+    // Picture controls: one boxed menu row with the sliders, Mirror and Reset. Locked until a licence key
+    // is saved (see eos-webcam.js); then the box is grey and starts with the Unlock line.
+    let picture = NSMenuItem()
+    let pictureView = FlippedView()
+    let box = NSBox()
+    let unlock = NSButton(title: "", target: nil, action: nil)
+    let mirror = NSButton(checkboxWithTitle: "Mirror image", target: nil, action: nil)
+    let reset = NSButton(title: "Reset", target: nil, action: nil)
+    var licensed: Bool?
     var buyURL = "https://ko-fi.com/pavelk"
-    let mirror = NSMenuItem(title: "Mirror image", action: #selector(AppDelegate.toggleMirror), keyEquivalent: "")
     // Live preview in the menu: the /view page, the same picture the virtual camera shows. Loaded only while the menu is open.
     // Width of the preview and slider rows; they also stretch to the menu's width (set by its widest line, the battery line).
     static let panel: CGFloat = 340
@@ -73,16 +82,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         add(menu, "Turn off", #selector(turnOff), .systemRed)
         menu.addItem(.separator())
         menu.addItem(previewItem())
-        for (title, key, low, high) in adjustments { addSlider(menu, title, key, low, high) }
-        mirror.target = self
-        mirror.attributedTitle = dotted("Mirror image", .clear) // lines up with the other items
-        menu.addItem(mirror)
-        add(menu, "Reset picture", #selector(resetPicture), .clear)
-        reset = menu.items.last
-        unlock.target = self
-        unlock.attributedTitle = dotted("Unlock picture controls (5 EUR)...", .systemBlue)
-        menu.addItem(unlock)
-        menu.autoenablesItems = false
+        menu.addItem(pictureItem())
         menu.addItem(.separator())
         add(menu, "Open preview", #selector(openPreview), .clear)
         add(menu, "Quit EOS Webcam", #selector(quitApp), .clear)
@@ -148,24 +148,81 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return entry
     }
 
-    func addSlider(_ menu: NSMenu, _ title: String, _ key: String, _ low: Double, _ high: Double) {
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: AppDelegate.panel, height: 42))
-        view.autoresizingMask = [.width]
-        let label = NSTextField(labelWithString: title)
-        label.font = .menuFont(ofSize: 12)
-        label.textColor = .secondaryLabelColor
-        label.frame = NSRect(x: 20, y: 22, width: AppDelegate.panel - 40, height: 16)
-        let slider = NSSlider(value: 100, minValue: low, maxValue: high, target: self, action: #selector(slid(_:)))
-        slider.isContinuous = true
-        slider.identifier = NSUserInterfaceItemIdentifier(key)
-        slider.frame = NSRect(x: 18, y: 2, width: AppDelegate.panel - 36, height: 20)
-        slider.autoresizingMask = [.width]
-        view.addSubview(label)
-        view.addSubview(slider)
-        let entry = NSMenuItem()
-        entry.view = view
-        menu.addItem(entry)
-        sliders[key] = (slider, label, title)
+    func pictureItem() -> NSMenuItem {
+        pictureView.frame = NSRect(x: 0, y: 0, width: AppDelegate.panel, height: 200)
+        pictureView.autoresizingMask = [.width]
+        box.boxType = .custom
+        box.titlePosition = .noTitle
+        box.cornerRadius = 8
+        box.borderWidth = 1
+        box.borderColor = .separatorColor
+        box.autoresizingMask = [.width]
+        pictureView.addSubview(box)
+        unlock.isBordered = false
+        unlock.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: "Locked")
+        unlock.imagePosition = .imageLeading
+        unlock.contentTintColor = .controlAccentColor
+        unlock.alignment = .left
+        unlock.attributedTitle = NSAttributedString(string: " Unlock picture controls (5 EUR)...",
+            attributes: [.foregroundColor: NSColor.controlAccentColor, .font: NSFont.menuFont(ofSize: 13)])
+        unlock.target = self
+        unlock.action = #selector(enterKey)
+        unlock.autoresizingMask = [.width]
+        pictureView.addSubview(unlock)
+        for (title, key, low, high) in adjustments {
+            let label = NSTextField(labelWithString: title)
+            label.font = .menuFont(ofSize: 12)
+            label.autoresizingMask = [.width]
+            let slider = NSSlider(value: 100, minValue: low, maxValue: high, target: self, action: #selector(slid(_:)))
+            slider.isContinuous = true
+            slider.identifier = NSUserInterfaceItemIdentifier(key)
+            slider.autoresizingMask = [.width]
+            pictureView.addSubview(label)
+            pictureView.addSubview(slider)
+            sliders[key] = (slider, label, title)
+        }
+        mirror.target = self
+        mirror.action = #selector(toggleMirror)
+        mirror.font = .menuFont(ofSize: 12)
+        reset.target = self
+        reset.action = #selector(resetPicture)
+        reset.bezelStyle = .rounded
+        reset.controlSize = .small
+        reset.autoresizingMask = [.minXMargin]
+        pictureView.addSubview(mirror)
+        pictureView.addSubview(reset)
+        layoutPicture(licensed: true)
+        picture.view = pictureView
+        return picture
+    }
+
+    // Lays out the box; locked: grey fill, Unlock line on top, controls disabled.
+    func layoutPicture(licensed: Bool) {
+        let width = max(pictureView.frame.width, AppDelegate.panel)
+        var y: CGFloat = 12
+        unlock.isHidden = licensed
+        if !licensed {
+            unlock.frame = NSRect(x: 26, y: y, width: width - 52, height: 22)
+            y += 30
+        }
+        for (_, key, _, _) in adjustments {
+            guard let (slider, label, _) = sliders[key] else { continue }
+            label.frame = NSRect(x: 28, y: y, width: width - 56, height: 16)
+            label.textColor = licensed ? .secondaryLabelColor : .tertiaryLabelColor
+            slider.frame = NSRect(x: 26, y: y + 18, width: width - 52, height: 20)
+            slider.isEnabled = licensed
+            y += 44
+        }
+        mirror.frame = NSRect(x: 26, y: y, width: 160, height: 20)
+        mirror.isEnabled = licensed
+        reset.frame = NSRect(x: width - 26 - 64, y: y - 1, width: 64, height: 22)
+        reset.isEnabled = licensed
+        y += 30
+        box.frame = NSRect(x: 14, y: 4, width: width - 28, height: y - 4)
+        box.fillColor = licensed ? .clear : NSColor.labelColor.withAlphaComponent(0.06)
+        pictureView.frame.size = NSSize(width: width, height: y + 6)
+        self.licensed = licensed
+        picture.menu?.itemChanged(picture)
     }
 
     func setSlider(_ key: String, _ value: Double) {
@@ -193,7 +250,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // Flips the picture left to right, for the preview and the virtual camera.
     @objc func toggleMirror() {
-        mirror.state = mirror.state == .on ? .off : .on
         post("/api/adjust?mirror=\(mirror.state == .on ? 1 : 0)")
     }
 
@@ -260,10 +316,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 self.show(text: text, color: color, battery: level)
                 for (key, value) in picture where self.sliders[key]?.0 !== self.tracking { self.setSlider(key, value) }
                 if let value = picture["mirror"] { self.mirror.state = value == 1 ? .on : .off }
-                for (slider, _, _) in self.sliders.values { slider.isEnabled = licensed }
-                self.mirror.isEnabled = licensed
-                self.reset?.isEnabled = licensed
-                self.unlock.isHidden = licensed
+                if self.licensed != licensed { self.layoutPicture(licensed: licensed) }
                 if let link = buy { self.buyURL = link }
             }
             CFRunLoopWakeUp(CFRunLoopGetMain())
@@ -286,7 +339,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func turnOff() { run("/usr/bin/pkill", ["-INT", "-f", "node eos-webcam.js"]) }
 
     // Ask for the licence key; "Buy on Ko-fi" opens the shop item.
+    // From the Unlock line inside the open menu: close the menu first, then ask.
     @objc func enterKey() {
+        item.menu?.cancelTracking()
+        DispatchQueue.main.async { self.askForKey() }
+    }
+
+    func askForKey() {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = "Unlock picture controls"
