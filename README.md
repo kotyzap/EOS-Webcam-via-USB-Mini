@@ -5,7 +5,7 @@
 <h1 align="center">EOS Webcam</h1>
 
 <p align="center">
-  Use a Canon EOS 80D as a Mac webcam over the normal USB cable, without Canon's app.<br>
+  Use a Canon EOS camera (tested with the 80D) as a Mac webcam over the normal USB cable, without Canon's app.<br>
   <a href="https://kotyzap.github.io/EOS-Webcam-via-USB-Mini/"><b>Explainer with interactive diagram</b></a>
 </p>
 
@@ -47,11 +47,9 @@ The installer puts **EOS Webcam.app** in Applications. After that you can delete
 
 Everything is in the menu bar icon. The lens colour shows the state, and each menu item carries the colour it leads to.
 
-| Menu item | Lens | What it does |
-|---|---|---|
-| Start camera | <img src="docs/img/lens-live.png" width="24" height="24" alt="Green lens"> Green | Starts the camera stream and the virtual camera. |
-| Stop camera | <img src="docs/img/lens-not-live.png" width="24" height="24" alt="Orange lens"> Orange | Frees the camera for other apps. Call apps show a "Camera is not live" card. |
-| Turn off | <img src="docs/img/lens-off.png" width="24" height="24" alt="Red lens"> Red | Ends the background script as well. The card stays. |
+- <img src="docs/img/lens-live.png" width="24" height="24" alt="Green lens"> **Start camera** (green): starts the camera stream and the virtual camera.
+- <img src="docs/img/lens-not-live.png" width="24" height="24" alt="Orange lens"> **Stop camera** (orange): frees the camera for other apps. Call apps show a "Camera is not live" card.
+- <img src="docs/img/lens-off.png" width="24" height="24" alt="Red lens"> **Turn off** (red): ends the background script as well. The card stays.
 
 The menu also shows the camera's battery level (read when the stream starts) and opens a preview page at `http://127.0.0.1:8809`.
 

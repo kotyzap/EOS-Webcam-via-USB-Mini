@@ -9,7 +9,7 @@ fps = 30
 
 [[sources]]
 id = "canon"
-name = "Canon 80D"
+name = "Canon EOS"
 kind = "browser"
 url = "http://127.0.0.1:8809/view"
 width = 1280

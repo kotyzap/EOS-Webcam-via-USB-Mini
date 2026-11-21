@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EOS Webcam One-Pager</title>
-<meta name="description" content="Use a Canon EOS 80D as a Mac webcam over the normal USB cable, without Canon's app: gphoto2, one Node script and a free virtual camera.">
+<meta name="description" content="Use a Canon EOS camera (tested with the 80D) as a Mac webcam over the normal USB cable, without Canon's app: gphoto2, one Node script and a free virtual camera.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -125,8 +125,8 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   </header>
 
   <section class="col">
-    <h1>A Canon EOS 80D as a Mac webcam, with the USB cable you already have</h1>
-    <p class="lede">Canon's own webcam app freezes on macOS 26. This setup replaces it with one small menu bar app and a free virtual camera, so the 80D shows up in Zoom, Meet or Detail like any other camera.</p>
+    <h1>A Canon EOS camera as a Mac webcam, with the USB cable you already have</h1>
+    <p class="lede">Canon's own webcam app freezes on macOS 26. This setup replaces it with one small menu bar app and a free virtual camera, so the camera shows up in Zoom, Meet or Detail like any other camera.</p>
     <div class="facts">
       <div><b>960×640</b><span>live view from the camera, about 15 fps</span></div>
       <div><b>1280×720</b><span>virtual camera output, 30 fps</span></div>
@@ -232,8 +232,8 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
      d:'The Node script cuts gphoto2’s byte stream into single JPEG frames and runs a small web server on 127.0.0.1:8809 with the preview page, /view, /frame and /stream.'},
     {id:'store',t:'store',x:920,y:36,ic:'🗂',lb:'Newest frame',st:'Kept in memory, served at /frame',
      d:'Only the latest frame is kept. Anything that asks for /frame gets the most recent picture, so a slow viewer never falls behind.'},
-    {id:'camera',t:'tool',x:470,y:228,ic:'📷',lb:'Canon EOS 80D',st:'Movie mode, Mini-USB cable',
-     d:'The camera sends its live view as 960×640 JPEG images over the normal USB data cable. Auto power off must be disabled or it switches off mid-call.'},
+    {id:'camera',t:'tool',x:470,y:228,ic:'📷',lb:'Canon EOS camera',st:'Tested with 80D: movie mode, Mini-USB',
+     d:'The 80D sends its live view as 960×640 JPEG images over the normal USB data cable. Auto power off must be disabled or it switches off mid-call.'},
     {id:'live',t:'decision',x:920,y:228,ic:'❓',lb:'Live frame available?',st:'Is the camera streaming',
      d:'While gphoto2 runs, /frame answers with a JPEG. When the camera is stopped, off or unplugged, it answers 503 and the /view page hides its picture.'},
     {id:'compose',t:'process',x:695,y:420,ic:'🎬',lb:'Compose 720p scene',st:'Rendered from the /view page',
