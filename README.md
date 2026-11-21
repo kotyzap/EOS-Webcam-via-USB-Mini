@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="docs/img/poster.jpg" width="100%" alt="Poster: Canon to Webcam. A Canon EOS 80D on a tripod connected by a USB-Mini to USB-C cable to a laptop">
+</p>
+
+<p align="center">
   <img src="docs/img/icon.png" width="128" height="128" alt="EOS Webcam icon">
 </p>
 
@@ -11,7 +15,7 @@
 
 ---
 
-<img src="docs/img/setup.jpg" width="63.6%" alt="Canon EOS 80D on a small tripod next to a Mac monitor showing the EOS Webcam preview page streaming at 15 fps"><img src="docs/img/poster.jpg" width="35.7%" alt="Poster: Canon to Webcam. A Canon EOS 80D on a tripod connected by a USB-Mini to USB-C cable to a laptop">
+<img src="docs/img/setup.jpg" width="100%" alt="Canon EOS 80D on a small tripod next to a Mac monitor showing the EOS Webcam preview page streaming at 15 fps">
 
 Canon's EOS Webcam Utility freezes on macOS 26. This project replaces it with one small menu bar app and a free virtual camera, so the camera shows up in Zoom, Meet or Detail like any other webcam.
 
