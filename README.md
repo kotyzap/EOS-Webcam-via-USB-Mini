@@ -43,17 +43,28 @@ The installer puts **EOS Webcam.app** in Applications. After that you can delete
 
 ## Using it
 
+<img src="docs/img/menu.png" width="362" align="right" alt="EOS Webcam menu: status, battery, Start, Stop, Turn off, live preview, Brightness, Contrast and Saturation sliders, Mirror image, Reset picture">
+
 Everything is in the menu bar icon. The lens colour shows the state, and each menu item carries the colour it leads to.
 
 | Menu item | Lens | What it does |
 |---|---|---|
-| Start camera | Green | Starts the camera stream and the virtual camera. |
-| Stop camera | Orange | Frees the camera for other apps. Call apps show a "Camera is not live" card. |
-| Turn off | Red | Ends the background script as well. The card stays. |
+| Start camera | <img src="docs/img/lens-live.png" width="24" height="24" alt="Green lens"> Green | Starts the camera stream and the virtual camera. |
+| Stop camera | <img src="docs/img/lens-not-live.png" width="24" height="24" alt="Orange lens"> Orange | Frees the camera for other apps. Call apps show a "Camera is not live" card. |
+| Turn off | <img src="docs/img/lens-off.png" width="24" height="24" alt="Red lens"> Red | Ends the background script as well. The card stays. |
 
 The menu also shows the camera's battery level (read when the stream starts) and opens a preview page at `http://127.0.0.1:8809`.
 
-The menu and the preview page both have a live preview, Brightness, Contrast and Saturation sliders, a Mirror switch and Reset. They change the picture call apps get, stay in step with each other and are kept in `~/.eos-webcam.json`.
+Below them, the menu has picture controls. The preview page has the same ones:
+
+- **Live preview** of exactly what call apps get.
+- **Brightness, Contrast, Saturation** sliders.
+- **Mirror image**, for apps that show you flipped. Some apps, like Zoom, only flip your own view; this setting flips what everyone sees.
+- **Reset picture** puts the sliders back to 100%.
+
+The menu and the page stay in step, and the settings are kept in `~/.eos-webcam.json`.
+
+<br clear="right">
 
 To start EOS Webcam with the Mac, add it under System Settings > General > Login Items.
 
