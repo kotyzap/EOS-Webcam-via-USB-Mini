@@ -352,6 +352,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         alert.informativeText = "Brightness, contrast, saturation and mirror: 5 EUR once on Ko-fi. The licence key arrives by email. Paste it here."
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 320, height: 24))
         field.placeholderString = "EW1..."
+        // Menu bar apps have no Edit menu, so Cmd+V does not reach the field: take a copied key from the clipboard.
+        let copied = (NSPasteboard.general.string(forType: .string) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if copied.hasPrefix("EW1.") { field.stringValue = copied }
         alert.accessoryView = field
         alert.addButton(withTitle: "Save key")
         alert.addButton(withTitle: "Buy on Ko-fi")
