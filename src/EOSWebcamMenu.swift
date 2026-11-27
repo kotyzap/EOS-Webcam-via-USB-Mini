@@ -349,7 +349,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSApp.activate(ignoringOtherApps: true)
         let alert = NSAlert()
         alert.messageText = "Unlock picture controls"
-        alert.informativeText = "Brightness, contrast, saturation and mirror: 5 EUR once on Ko-fi. The licence key arrives by email. Paste it here."
+        alert.informativeText = "Brightness, contrast, saturation and mirror: 5 EUR once on Ko-fi. Ko-fi shows the licence key after you pay. Copy it and open this again: it is filled in for you."
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 320, height: 24))
         field.placeholderString = "EW1..."
         // Menu bar apps have no Edit menu, so Cmd+V does not reach the field: take a copied key from the clipboard.
